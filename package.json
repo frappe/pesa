@@ -1,0 +1,28 @@
+{
+  "name": "pesa",
+  "version": "1.0.0",
+  "description": "A currency lib whose precision goes upto 11 (and beyond)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frappe/pesa.git"
+  },
+  "keywords": [
+    "currency",
+    "precision",
+    "money",
+    "accounting",
+    "utilities",
+    "jsLibForJeff"
+  ],
+  "type": "module",
+  "author": "18alantom",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/frappe/pesa/issues"
+  },
+  "homepage": "https://github.com/frappe/pesa#readme"
+}
