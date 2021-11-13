@@ -1,5 +1,5 @@
-import PreciseNumber from "./preciseNumber";
-import { DEF_DISP, DEF_PREC } from "./consts";
+import PreciseNumber from './preciseNumber';
+import { DEF_DISP, DEF_PREC } from './consts';
 
 interface Options {
   precision?: number;
@@ -7,34 +7,25 @@ interface Options {
   currency?: string;
 }
 
-const defaultOptions: Options = {
-  precision: DEF_PREC,
-  display: DEF_DISP,
-  currency: "",
-};
+type Input = Money | number | string;
 
-// to handle conversions and formatting
 export default class Money extends PreciseNumber {
   display: number;
   currency: string;
 
-  constructor(amount, options: Options = {}) {
-    const { precision, display, currency } = Object.assign(
-      {},
-      defaultOptions,
-      options
-    );
-    super(amount, precision);
+  constructor(amount: Input, options: Options = {}) {
+    super(amount, options.precision ?? DEF_PREC);
 
-    this.display = display;
-    this.currency = currency;
+    this.display = options.display ?? DEF_DISP;
+    this.currency = options.currency ?? '';
   }
 
+  // @ts-ignore will remove it once complete
   convert(to: string, from?: string): Money {
     if (!this.currency && !from) {
-      throw Error("currency has not been set for conversion");
+      throw Error('currency has not been set for conversion');
     }
 
-    throw Error("Not implemented currency conversion of Money type");
+    throw Error('Not implemented currency conversion of Money type');
   }
 }

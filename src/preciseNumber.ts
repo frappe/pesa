@@ -1,22 +1,22 @@
-import { MIN_PREC, DEF_PREC, MAX_PREC } from "./consts";
-import { getFractionalLength } from "./utils";
+import { MIN_PREC, DEF_PREC, MAX_PREC } from './consts';
+import { getFractionalLength } from './utils';
 
-enum Operator {
-  Add = "+",
-  Sub = "-",
-  Mul = "*",
-  Div = "/",
+const enum Operator {
+  Add = '+',
+  Sub = '-',
+  Mul = '*',
+  Div = '/',
 }
 
-enum Comparator {
-  Eq = "===",
-  Gt = ">",
-  Lt = "<",
-  Gte = ">=",
-  Lte = "<=",
+const enum Comparator {
+  Eq = '===',
+  Gt = '>',
+  Lt = '<',
+  Gte = '>=',
+  Lte = '<=',
 }
 
-type Input = PreciseNumber | number;
+type Input = PreciseNumber | number | string;
 
 export default class PreciseNumber {
   precision: number;
@@ -41,10 +41,14 @@ export default class PreciseNumber {
       return value.#value;
     }
 
+    if (typeof value === 'string') {
+      value = this.parse(value);
+    }
+
     return this.#scaler(value);
   }
 
-  #executeOperation(operator: Operator, ...values): PreciseNumber {
+  #executeOperation(operator: Operator, ...values: Input[]): PreciseNumber {
     const neutralizer: bigint = BigInt(Math.pow(10, this.precision));
     const prAmounts: bigint[] = values.map(this.#scaleAndConvert, this);
     const finalAmount: bigint = prAmounts.reduce((a, b) => {
@@ -65,31 +69,35 @@ export default class PreciseNumber {
     return this;
   }
 
-  #executeComparison(comparator, valueA, valueB) {
+  #executeComparison(
+    comparator: Comparator,
+    valueA: Input,
+    valueB: Input
+  ): boolean {
     const prAmountA = this.#scaleAndConvert(valueA);
     const prAmountB = this.#scaleAndConvert(valueB);
     switch (comparator) {
-      case "===":
+      case '===':
         return prAmountA === prAmountB;
-      case ">":
+      case '>':
         return prAmountA > prAmountB;
-      case "<":
+      case '<':
         return prAmountA < prAmountB;
-      case ">=":
+      case '>=':
         return prAmountA >= prAmountB;
-      case "<=":
+      case '<=':
         return prAmountA <= prAmountB;
       default:
         return false;
     }
   }
 
-  static #splitInput(values) {
+  static #splitInput(values: Input[]): [Input, Input[]] {
     return [values[0], values.slice(1)];
   }
 
   /* ---------------------------------
-   * Constructor
+   * Constructor and overridables
    * ---------------------------------*/
 
   constructor(value: Input = 0, precision: number = DEF_PREC) {
@@ -98,8 +106,13 @@ export default class PreciseNumber {
       throw Error(`precision should be between ${MIN_PREC} and ${MAX_PREC}`);
     }
 
+    this.#value = 0n;
     this.precision = precision;
     this.value = value;
+  }
+
+  parse(value: string): number {
+    return parseFloat(value);
   }
 
   /* ---------------------------------
@@ -232,5 +245,13 @@ export default class PreciseNumber {
 
   toString(): string {
     return this.value.toFixed(DEF_PREC);
+  }
+
+  toJSON(): string {
+    return this.#value.toString();
+  }
+
+  valueOf(): bigint {
+    return this.#value;
   }
 }

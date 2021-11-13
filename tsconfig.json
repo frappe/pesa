@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    // Checks
+    "strict": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "allowUnusedLabels": false,
+    "noUnusedParameters": true,
+    "noImplicitOverride": true,
+    "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+    // Declaration
+    "declaration": true,
+    "declarationMap": true,
+    "declarationDir": "./dist/types",
+    // Other
+    "target": "es2020",
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["index.ts", "src/**/*", "tests/**/*"]
+}
