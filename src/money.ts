@@ -1,7 +1,7 @@
 import PreciseNumber from './preciseNumber';
 import { DEF_DISP, DEF_PREC } from './consts';
 
-interface Options {
+export interface Options {
   precision?: number;
   display?: number;
   currency?: string;

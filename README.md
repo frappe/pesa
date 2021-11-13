@@ -1,4 +1,4 @@
-# `pesa`
+# पेसा
 
 The missing money library for JS that can handle USD to VEF conversions for Jeff without breaking a sweat!
 
