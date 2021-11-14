@@ -1,4 +1,10 @@
-# पेसा
+
+<div align="center" markdown="1">
+
+![pesa logo](.github/logo.png)
+
+</div>
+
 
 The missing money library for JS that can handle USD to VEF conversions for Jeff without breaking a sweat!
 

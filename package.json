@@ -1,7 +1,7 @@
 {
   "name": "pesa",
   "version": "1.0.0",
-  "description": "A currency lib whose precision goes upto 11 (and beyond)",
+  "description": "A JS money lib whose precision goes upto 11 (and beyond)",
   "main": "dist/pesa.cjs",
   "browser": "dist/pesa.js",
   "module": "dist/pesa.mjs",
