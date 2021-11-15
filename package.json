@@ -11,7 +11,7 @@
   "scripts": {
     "check": "prettier --check . && tsc --noEmit",
     "test": "mocha --reporter nyan --require ts-node/register tests/**/*.spec.ts",
-    "build": "tsc --emitDeclarationOnly && node build.js",
+    "build": "tsc --emitDeclarationOnly && rm -rf dist/types/tests && node build.js",
     "format": "prettier --write ."
   },
   "repository": {
