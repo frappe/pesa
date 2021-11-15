@@ -44,19 +44,31 @@ export function getIsInputValid(value: string): boolean {
 }
 
 export function toDecimalString(value: bigint, precision: number): string {
-  const stringRep = value.toString();
+  const isNegative = value < 0;
+  let stringRep = value.toString();
+  stringRep = isNegative ? stringRep.slice(1) : stringRep;
+
   const d = stringRep.length - precision;
-  const whole = stringRep.slice(0, d);
-  const fractional = stringRep.slice(d);
-  if (fractional.length) {
-    return stripZeros(`${whole}.${fractional}`) as string;
+  const sign = isNegative ? '-' : '';
+
+  if (d < 0) {
+    return sign + '0.' + '0'.repeat(Math.abs(d)) + stringRep;
+  } else if (d === 0) {
+    return sign + '0.' + stringRep;
   }
-  return whole;
+
+  const whole = stringRep.slice(0, d) || '0';
+  const fractional = stringRep.slice(d);
+
+  if (fractional.length) {
+    return (sign + stripZeros(`${whole}.${fractional}`)) as string;
+  }
+  return sign + whole;
 }
 
 function stripZeros(value: ScalerInput): ScalerInput {
   if (typeof value === 'string') {
-    return (value as string).replace(/0+$/, '');
+    return (value as string).replace(/\.?0+$/, '');
   }
   return value;
 }
