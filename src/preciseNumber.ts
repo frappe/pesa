@@ -1,5 +1,5 @@
 import { MIN_PREC, DEF_PREC, MAX_PREC } from './consts';
-import { getFractionalLength } from './utils';
+import { scaler, toDecimalString } from './utils';
 
 const enum Operator {
   Add = '+',
@@ -26,26 +26,12 @@ export default class PreciseNumber {
    * Private methods
    * ---------------------------------*/
 
-  #scaler(value: number): bigint {
-    const interPrec = getFractionalLength(value);
-    const finalPrec = Math.max(this.precision - interPrec, 0);
-
-    value = value * Math.pow(10, interPrec);
-    value = Math.round(value);
-
-    return BigInt(value) * BigInt(Math.pow(10, finalPrec));
-  }
-
   #scaleAndConvert(value: Input): bigint {
     if (value instanceof PreciseNumber) {
       return value.#value;
     }
 
-    if (typeof value === 'string') {
-      value = this.parse(value);
-    }
-
-    return this.#scaler(value);
+    return scaler(value, this.precision);
   }
 
   #executeOperation(operator: Operator, ...values: Input[]): PreciseNumber {
@@ -109,10 +95,6 @@ export default class PreciseNumber {
     this.#value = 0n;
     this.precision = precision;
     this.value = value;
-  }
-
-  parse(value: string): number {
-    return parseFloat(value);
   }
 
   /* ---------------------------------
@@ -244,11 +226,11 @@ export default class PreciseNumber {
    * ---------------------------------*/
 
   toString(): string {
-    return this.value.toFixed(DEF_PREC);
+    return toDecimalString(this.#value, this.precision);
   }
 
   toJSON(): string {
-    return this.#value.toString();
+    return toDecimalString(this.#value, this.precision);
   }
 
   valueOf(): bigint {
