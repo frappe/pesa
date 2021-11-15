@@ -1,7 +1,7 @@
 
 <div align="center" markdown="1">
 
-![pesa logo](.github/logo.png)
+<img src=".github/logo.png" alt="pesa logo" width="256"/>
 
 # पेसा 
 
