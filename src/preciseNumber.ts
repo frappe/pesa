@@ -34,6 +34,15 @@ export default class PreciseNumber {
     return scaler(value, this.precision);
   }
 
+  #neutralizedMul(product: bigint, neutralizer: bigint) {
+    const final = product / neutralizer;
+    const temp = product.toString();
+    const roundingNum =
+      parseInt(temp.charAt(temp.length - this.precision) || '0') > 4 ? 1n : 0n;
+
+    return final + roundingNum;
+  }
+
   #executeOperation(operator: Operator, ...values: Input[]): PreciseNumber {
     const neutralizer: bigint = 10n ** BigInt(this.precision);
     const prAmounts: bigint[] = values.map(this.#scaleAndConvert, this);
@@ -44,9 +53,9 @@ export default class PreciseNumber {
         case Operator.Sub:
           return a - b;
         case Operator.Div:
-          return (a / b) * neutralizer;
+          return (a * neutralizer) / b;
         case Operator.Mul:
-          return (a * b) / neutralizer;
+          return this.#neutralizedMul(a * b, neutralizer);
         default:
           return 0n;
       }
