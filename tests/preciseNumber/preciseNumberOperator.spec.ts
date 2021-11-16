@@ -65,4 +65,24 @@ describe('PreciseNumber, Operators', function () {
       });
     }
   });
+  
+
+  context('Checking immutability', function () {
+    const precision = 6;
+    const p = getPreciseNumberMaker(precision);
+    const number = p(100.0);
+    const result = number.add(22).sub(33).mul(100).div(5);
+
+    specify('checking initial', function () {
+      assert.strictEqual(number.i, 100000000n);
+      assert.strictEqual(number.v, 100);
+      assert.strictEqual(number.precision, precision);
+    });
+
+    specify('checking result', function () {
+      assert.strictEqual(result.i, 1780000000n);
+      assert.strictEqual(result.v, 1780);
+      assert.strictEqual(result.precision, precision);
+    });
+  });
 });

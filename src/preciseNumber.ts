@@ -19,7 +19,7 @@ const enum Comparator {
 type Input = PreciseNumber | number | string;
 
 export default class PreciseNumber {
-  precision: number;
+  #precision: number;
   #value: bigint;
 
   /* ---------------------------------
@@ -31,20 +31,20 @@ export default class PreciseNumber {
       return value.#value;
     }
 
-    return scaler(value, this.precision);
+    return scaler(value, this.#precision);
   }
 
   #neutralizedMul(product: bigint, neutralizer: bigint) {
     const final = product / neutralizer;
     const temp = product.toString();
     const roundingNum =
-      parseInt(temp.charAt(temp.length - this.precision) || '0') > 4 ? 1n : 0n;
+      parseInt(temp.charAt(temp.length - this.#precision) || '0') > 4 ? 1n : 0n;
 
     return final + roundingNum;
   }
 
   #executeOperation(operator: Operator, ...values: Input[]): PreciseNumber {
-    const neutralizer: bigint = 10n ** BigInt(this.precision);
+    const neutralizer: bigint = 10n ** BigInt(this.#precision);
     const prAmounts: bigint[] = values.map(this.#scaleAndConvert, this);
     const finalAmount: bigint = prAmounts.reduce((a, b) => {
       switch (operator) {
@@ -60,8 +60,10 @@ export default class PreciseNumber {
           return 0n;
       }
     });
-    this.#value = finalAmount;
-    return this;
+    // this.#value = finalAmount;
+    const result = new PreciseNumber(0, this.#precision);
+    result._setInnerValue(finalAmount);
+    return result;
   }
 
   #executeComparison(
@@ -92,7 +94,7 @@ export default class PreciseNumber {
   }
 
   /* ---------------------------------
-   * Constructor and overridables
+   * Constructor and others
    * ---------------------------------*/
 
   constructor(value: Input = 0, precision: number = DEF_PREC) {
@@ -102,8 +104,12 @@ export default class PreciseNumber {
     }
 
     this.#value = 0n;
-    this.precision = precision;
+    this.#precision = precision;
     this.value = value;
+  }
+
+  _setInnerValue(value: bigint) {
+    this.#value = value;
   }
 
   /* ---------------------------------
@@ -111,7 +117,7 @@ export default class PreciseNumber {
    * ---------------------------------*/
 
   get value(): number {
-    return Number(this.#value) / Math.pow(10, this.precision);
+    return Number(this.#value) / Math.pow(10, this.#precision);
   }
 
   set value(value: Input) {
@@ -120,6 +126,10 @@ export default class PreciseNumber {
 
   get integer(): bigint {
     return this.#value;
+  }
+
+  get precision(): number {
+    return this.#precision;
   }
 
   /* ---------------------------------
@@ -235,11 +245,11 @@ export default class PreciseNumber {
    * ---------------------------------*/
 
   toString(): string {
-    return toDecimalString(this.#value, this.precision);
+    return toDecimalString(this.#value, this.#precision);
   }
 
   toJSON(): string {
-    return toDecimalString(this.#value, this.precision);
+    return toDecimalString(this.#value, this.#precision);
   }
 
   valueOf(): bigint {
