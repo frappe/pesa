@@ -5,17 +5,21 @@ export function scaler(value: ScalerInput, precision: number): bigint {
   value = stripZeros(value);
   const fractionalLength = getFractionalLength(value);
   const stringRep = typeof value === 'number' ? value.toString() : value;
+  const floatRep = typeof value === 'string' ? parseFloat(value) : value;
   const parts = stringRep.split('.');
   const whole = parts[0];
   const fractional = parts[1] ?? '';
 
-  let bigRep = BigInt(whole + fractional);
+  let stringBigRep = whole + fractional;
+  stringBigRep = stringBigRep === '-0' ? '0' : stringBigRep;
+  let bigRep = BigInt(stringBigRep);
+
   if (precision > fractionalLength) {
     bigRep *= 10n ** BigInt(precision - fractionalLength);
   } else {
     bigRep /= 10n ** BigInt(fractionalLength - precision);
     if (parseInt(fractional[precision]) > 4) {
-      bigRep += bigRep > 0 ? 1n : -1n;
+      bigRep += floatRep >= 0 ? 1n : -1n;
     }
   }
   return bigRep;
@@ -67,8 +71,11 @@ export function toDecimalString(value: bigint, precision: number): string {
 }
 
 function stripZeros(value: ScalerInput): ScalerInput {
-  if (typeof value === 'string') {
-    return (value as string).replace(/\.?0+$/, '');
+  if (typeof value === 'string' && value.includes('.') && value.endsWith('0')) {
+    let [fractional, whole] = (value as string).split('.');
+    whole = whole.replace(/0*$/, '');
+    whole = whole.length > 0 ? `.${whole}` : whole;
+    return fractional + whole;
   }
   return value;
 }

@@ -35,7 +35,7 @@ export default class PreciseNumber {
   }
 
   #executeOperation(operator: Operator, ...values: Input[]): PreciseNumber {
-    const neutralizer: bigint = BigInt(Math.pow(10, this.precision));
+    const neutralizer: bigint = 10n ** BigInt(this.precision);
     const prAmounts: bigint[] = values.map(this.#scaleAndConvert, this);
     const finalAmount: bigint = prAmounts.reduce((a, b) => {
       switch (operator) {
