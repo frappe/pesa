@@ -1,6 +1,6 @@
 import PreciseNumber from './preciseNumber';
 import { DEF_PREC } from './consts';
-import { fetchRate, getIsCurrencyCode, getConversionRateKey } from './utils';
+import { getIsCurrencyCode, getConversionRateKey } from './utils';
 
 export interface Options {
   precision?: number;
@@ -43,8 +43,16 @@ export default class Money implements ProxyHandler<Money> {
     return this.#preciseNumber.precision;
   }
 
-  get preciseNumber() {
-    return this.#preciseNumber;
+  get preciseNumber(): PreciseNumber {
+    return new PreciseNumber(this.preciseNumber, this.precision);
+  }
+
+  get integer() {
+    return this.#preciseNumber.integer;
+  }
+
+  get float() {
+    return this.#preciseNumber.value;
   }
 
   /* ---------------------------------
@@ -63,27 +71,6 @@ export default class Money implements ProxyHandler<Money> {
     }
   }
 
-  #getConversionRate(from: string, to: string): number {
-    let key = getConversionRateKey(from, to);
-    let value = this.#conversionRates.get(key);
-
-    // Use reciprocal of the otherway round
-    if (!value) {
-      key = getConversionRateKey(to, from);
-      value = this.#conversionRates.get(key);
-
-      if (value) {
-        value = 1 / value;
-      }
-    }
-
-    if (!value) {
-      throw Error(`please set the conversion rate for ${from} to ${to}`);
-    }
-
-    return value;
-  }
-
   #copySelf(preciseNumber: PreciseNumber, currency: string = ''): Money {
     const options = {
       currency: currency || this.#currency,
@@ -96,19 +83,34 @@ export default class Money implements ProxyHandler<Money> {
   }
 
   #convertInput(value: ArithmeticInput, currency?: string, rate?: number) {
-    let lhs = this.#preciseNumber;
-    if (currency && rate && currency !== this.#currency) {
-      lhs = this.#preciseNumber.mul(rate);
-    }
-
     let rhs;
-    if (value instanceof Money) {
+    const valueIsMoney = value instanceof Money;
+    if (valueIsMoney) {
       rhs = value.preciseNumber;
+      currency = value.getCurrency() || currency;
     } else {
       rhs = new PreciseNumber(value, this.precision);
     }
 
-    return { lhs, rhs, outCurrency: currency || this.#currency };
+    if (currency && currency !== this.#currency) {
+      let finalRate;
+      if (rate) {
+        finalRate = rate;
+      } else if (valueIsMoney) {
+        try {
+          finalRate = value.getConversionRate(currency, this.#currency);
+        } catch {
+          finalRate = this.getConversionRate(currency, this.#currency);
+        }
+      } else {
+        finalRate = this.getConversionRate(currency, this.#currency);
+      }
+
+      rhs = rhs.mul(finalRate);
+    }
+
+    let lhs = this.#preciseNumber;
+    return { lhs, rhs };
   }
 
   /* ---------------------------------
@@ -129,25 +131,13 @@ export default class Money implements ProxyHandler<Money> {
     return this;
   }
 
-  async fetch(to: string): Promise<Money> {
-    this.#throwCurrencyNotSetIfNotSet();
-    const from = this.#currency;
-    const key = getConversionRateKey(from, to);
-    if (this.#conversionRates.has(key)) {
-      return this;
-    }
-    const rate = await fetchRate(from, to);
-    this.#conversionRates.set(key, rate);
-    return this;
-  }
-
   /* ---------------------------------
    * User facing functions (chainable, im-mutate)
    * ---------------------------------*/
 
   to(to: string): Money {
     this.#throwCurrencyNotSetIfNotSet();
-    const rate: number = this.#getConversionRate(this.#currency, to);
+    const rate: number = this.getConversionRate(this.#currency, to);
     const preciseNumber = this.#preciseNumber.mul(rate);
     return this.#copySelf(preciseNumber, to);
   }
@@ -157,27 +147,31 @@ export default class Money implements ProxyHandler<Money> {
    * ---------------------------------*/
 
   add(value: ArithmeticInput, currency?: string, rate?: number): Money {
-    const { lhs, rhs, outCurrency } = this.#convertInput(value, currency, rate);
+    const { lhs, rhs } = this.#convertInput(value, currency, rate);
     const outPreciseNumber = lhs.add(rhs);
-    return this.#copySelf(outPreciseNumber, outCurrency);
+    return this.#copySelf(outPreciseNumber);
   }
 
   sub(value: ArithmeticInput, currency?: string, rate?: number): Money {
-    const { lhs, rhs, outCurrency } = this.#convertInput(value, currency, rate);
+    const { lhs, rhs } = this.#convertInput(value, currency, rate);
     const outPreciseNumber = lhs.sub(rhs);
-    return this.#copySelf(outPreciseNumber, outCurrency);
+    return this.#copySelf(outPreciseNumber);
   }
 
   mul(value: ArithmeticInput, currency?: string, rate?: number): Money {
-    const { lhs, rhs, outCurrency } = this.#convertInput(value, currency, rate);
+    const { lhs, rhs } = this.#convertInput(value, currency, rate);
     const outPreciseNumber = lhs.mul(rhs);
-    return this.#copySelf(outPreciseNumber, outCurrency);
+    return this.#copySelf(outPreciseNumber);
   }
 
   div(value: ArithmeticInput, currency?: string, rate?: number): Money {
-    const { lhs, rhs, outCurrency } = this.#convertInput(value, currency, rate);
+    const { lhs, rhs } = this.#convertInput(value, currency, rate);
     const outPreciseNumber = lhs.div(rhs);
-    return this.#copySelf(outPreciseNumber, outCurrency);
+    return this.#copySelf(outPreciseNumber);
+  }
+
+  percent(value: number): Money {
+    return this.#copySelf(this.#preciseNumber.mul(value / 100));
   }
 
   /* ---------------------------------
@@ -221,7 +215,32 @@ export default class Money implements ProxyHandler<Money> {
     return new Map(this.#conversionRates);
   }
 
+  getConversionRate(from: string, to: string): number {
+    let key = getConversionRateKey(from, to);
+    let value = this.#conversionRates.get(key);
+
+    // Use reciprocal of the otherway round
+    if (!value) {
+      key = getConversionRateKey(to, from);
+      value = this.#conversionRates.get(key);
+
+      if (value) {
+        value = 1 / value;
+      }
+    }
+
+    if (!value) {
+      throw Error(`please set the conversion rate for ${from} to ${to}`);
+    }
+
+    return value;
+  }
+
   /* ---------------------------------
    * User facing functions (display)
    * ---------------------------------*/
+
+  round(to: number): string {
+    return this.#preciseNumber.round(to);
+  }
 }

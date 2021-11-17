@@ -118,6 +118,31 @@ export default class PreciseNumber {
     this.#value = value;
   }
 
+  round(to: number): string {
+    to = to >= 0 ? to : 0;
+
+    const diff = to - this.#precision;
+    const isNeg = this.#value < 0;
+    const stringRep = this.#value.toString().slice(isNeg ? 1 : 0);
+
+    const dpoint = stringRep.length - this.precision;
+    const whole = stringRep.slice(0, dpoint);
+    const fraction = stringRep.slice(dpoint);
+
+    const trailingZeros = '0'.repeat(Math.max(0, diff));
+    const roundingDigit = (parseInt(fraction[to]) || 0) > 4 ? 1n : 0n;
+    const lowPrescisionRep = (
+      BigInt(whole + fraction.slice(0, to) + trailingZeros) + roundingDigit
+    ).toString();
+
+    const newDpoint = lowPrescisionRep.length - to;
+    const newWhole = lowPrescisionRep.slice(0, newDpoint);
+    const newFractional = lowPrescisionRep.slice(newDpoint);
+    const tail = '.' + newFractional + '0'.repeat(to - newFractional.length);
+
+    return (isNeg ? '-' : '') + newWhole + (tail !== '.' ? tail : '');
+  }
+
   /* ---------------------------------
    * Getters and Setters
    * ---------------------------------*/

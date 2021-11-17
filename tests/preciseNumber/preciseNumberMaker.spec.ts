@@ -97,3 +97,34 @@ describe('PreciseNumber, Maker', function () {
     }
   });
 });
+
+describe('PreciseNumber, Other functions', function () {
+  context('Round', function () {
+    const testThese: [number, number, string, number][] = [
+      [1234.5678, 4, '1235', -1],
+      [1234.5678, 4, '1235', 0],
+      [1234.5678, 4, '1234.6', 1],
+      [1234.5678, 4, '1234.57', 2],
+      [1234.5678, 4, '1234.568', 3],
+      [1234.5678, 4, '1234.5678', 4],
+      [1234.5678, 4, '1234.56780', 5],
+      [1234.5678, 4, '1234.567800', 6],
+      [-1234.5678, 4, '-1235', -1],
+      [-1234.5678, 4, '-1235', 0],
+      [-1234.5678, 4, '-1234.6', 1],
+      [-1234.5678, 4, '-1234.57', 2],
+      [-1234.5678, 4, '-1234.568', 3],
+      [-1234.5678, 4, '-1234.5678', 4],
+      [-1234.5678, 4, '-1234.56780', 5],
+      [-1234.5678, 4, '-1234.567800', 6],
+    ];
+
+    for (let test of testThese) {
+      const [input, precision, expectedOutput, to] = test;
+      const output = p(input, precision).round(to);
+      specify(`input: ${input}`, function () {
+        assert.strictEqual(output, expectedOutput);
+      });
+    }
+  });
+});

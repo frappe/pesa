@@ -106,7 +106,3 @@ export function matchPrecision(
   }
   return value;
 }
-
-export async function fetchRate(from: string, to: string): Promise<number> {
-  return 1;
-}
