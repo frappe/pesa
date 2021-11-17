@@ -1,5 +1,5 @@
 import { MIN_PREC, DEF_PREC, MAX_PREC } from './consts';
-import { scaler, toDecimalString } from './utils';
+import { scaler, toDecimalString, matchPrecision } from './utils';
 
 const enum Operator {
   Add = '+',
@@ -28,7 +28,7 @@ export default class PreciseNumber {
 
   #scaleAndConvert(value: Input): bigint {
     if (value instanceof PreciseNumber) {
-      return value.#value;
+      return matchPrecision(value.integer, value.precision, this.precision);
     }
 
     return scaler(value, this.#precision);
@@ -89,6 +89,15 @@ export default class PreciseNumber {
     }
   }
 
+  #validateAndGetPrecision(precision: number) {
+    precision = Math.round(precision);
+    if (precision > MAX_PREC || precision < MIN_PREC) {
+      throw Error(`precision should be between ${MIN_PREC} and ${MAX_PREC}`);
+    }
+
+    return precision;
+  }
+
   static #splitInput(values: Input[]): [Input, Input[]] {
     return [values[0], values.slice(1)];
   }
@@ -98,10 +107,7 @@ export default class PreciseNumber {
    * ---------------------------------*/
 
   constructor(value: Input = 0, precision: number = DEF_PREC) {
-    precision = Math.round(precision);
-    if (precision > MAX_PREC || precision < MIN_PREC) {
-      throw Error(`precision should be between ${MIN_PREC} and ${MAX_PREC}`);
-    }
+    precision = this.#validateAndGetPrecision(precision);
 
     this.#value = 0n;
     this.#precision = precision;
@@ -130,6 +136,12 @@ export default class PreciseNumber {
 
   get precision(): number {
     return this.#precision;
+  }
+
+  set precision(precision: number) {
+    precision = this.#validateAndGetPrecision(precision);
+    this.#value = matchPrecision(this.#value, this.precision, this.#precision);
+    this.#precision = this.#precision;
   }
 
   /* ---------------------------------

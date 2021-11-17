@@ -79,3 +79,34 @@ function stripZeros(value: ScalerInput): ScalerInput {
   }
   return value;
 }
+
+export function getIsCurrencyCode(code: string): boolean {
+  return !!code.match(/^[A-Z]{3}$/);
+}
+
+export function getConversionRateKey(from: string, to: string) {
+  const keys = [from, to];
+  keys.forEach((key) => {
+    if (!getIsCurrencyCode(key)) {
+      throw Error(`invalid currency code '${key}'`);
+    }
+  });
+  return keys.join('-');
+}
+
+export function matchPrecision(
+  value: bigint,
+  from: number,
+  to: number
+): bigint {
+  if (from > to) {
+    return value / 10n ** BigInt(from - to);
+  } else if (from < to) {
+    return value * 10n ** BigInt(to - from);
+  }
+  return value;
+}
+
+export async function fetchRate(from: string, to: string): Promise<number> {
+  return 1;
+}
