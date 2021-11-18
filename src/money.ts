@@ -1,17 +1,20 @@
 import PreciseNumber from './preciseNumber';
-import { DEF_PREC } from './consts';
-import { getIsCurrencyCode, getConversionRateKey } from './utils';
+import { DEF_PREC, DEF_DISP } from './consts';
+import { getConversionRateKey } from './utils';
 
 export interface Options {
   precision?: number;
   currency?: string;
+  display?: number;
 }
 
 type Input = PreciseNumber | number | string;
 type ArithmeticInput = Money | number | string;
-type ConversionRateMap = Map<string, number>;
+type Rate = string | number;
+type ConversionRateMap = Map<string, Rate>;
 
-export default class Money implements ProxyHandler<Money> {
+export default class Money {
+  display: number;
   #currency: string;
   #preciseNumber: PreciseNumber;
   #conversionRates: ConversionRateMap;
@@ -23,36 +26,32 @@ export default class Money implements ProxyHandler<Money> {
     );
     this.#currency = options.currency ?? '';
     this.#conversionRates = new Map();
-
-    return new Proxy(this, this);
+    this.display = options.display ?? DEF_DISP;
   }
 
   /* ---------------------------------
    * Getters and setters
    * ---------------------------------*/
 
-  get(target: Money, prop: string) {
-    if (getIsCurrencyCode(prop) && target.getCurrency()) {
-      return target.to(prop);
-    }
-
-    return Reflect.get(target, prop);
-  }
-
-  get precision() {
-    return this.#preciseNumber.precision;
+  get float() {
+    return this.#preciseNumber.value;
   }
 
   get preciseNumber(): PreciseNumber {
-    return new PreciseNumber(this.preciseNumber, this.precision);
+    return new PreciseNumber(
+      this.#preciseNumber,
+      this.#preciseNumber.precision
+    );
   }
 
-  get integer() {
-    return this.#preciseNumber.integer;
+  get internal() {
+    const bigint = this.#preciseNumber.integer;
+    const precision = this.#preciseNumber.precision;
+    return { bigint, precision };
   }
 
-  get float() {
-    return this.#preciseNumber.value;
+  get conversionRates() {
+    return new Map(this.#conversionRates);
   }
 
   /* ---------------------------------
@@ -74,7 +73,8 @@ export default class Money implements ProxyHandler<Money> {
   #copySelf(preciseNumber: PreciseNumber, currency: string = ''): Money {
     const options = {
       currency: currency || this.#currency,
-      precision: this.precision,
+      precision: this.#preciseNumber.precision,
+      display: this.display,
     };
 
     const result = new Money(preciseNumber, options);
@@ -89,7 +89,7 @@ export default class Money implements ProxyHandler<Money> {
       rhs = value.preciseNumber;
       currency = value.getCurrency() || currency;
     } else {
-      rhs = new PreciseNumber(value, this.precision);
+      rhs = new PreciseNumber(value, this.#preciseNumber.precision);
     }
 
     if (currency && currency !== this.#currency) {
@@ -124,7 +124,7 @@ export default class Money implements ProxyHandler<Money> {
     return this;
   }
 
-  rate(to: string, value: number) {
+  rate(to: string, value: Rate) {
     this.#throwCurrencyNotSetIfNotSet();
     const key = getConversionRateKey(this.#currency, to);
     this.#conversionRates.set(key, value);
@@ -135,9 +135,16 @@ export default class Money implements ProxyHandler<Money> {
    * User facing functions (chainable, im-mutate)
    * ---------------------------------*/
 
-  to(to: string): Money {
+  to(to: string, rate?: Rate): Money {
     this.#throwCurrencyNotSetIfNotSet();
-    const rate: number = this.getConversionRate(this.#currency, to);
+    if (
+      typeof rate === 'number' ||
+      (typeof rate === 'string' && !this.hasConversionRate(to))
+    ) {
+      this.rate(to, rate);
+    } else {
+      rate = this.getConversionRate(this.#currency, to);
+    }
     const preciseNumber = this.#preciseNumber.mul(rate);
     return this.#copySelf(preciseNumber, to);
   }
@@ -211,20 +218,17 @@ export default class Money implements ProxyHandler<Money> {
     return this.#currency;
   }
 
-  getConversionRates() {
-    return new Map(this.#conversionRates);
-  }
-
-  getConversionRate(from: string, to: string): number {
+  getConversionRate(from: string, to: string): Rate {
     let key = getConversionRateKey(from, to);
     let value = this.#conversionRates.get(key);
 
-    // Use reciprocal of the otherway round
     if (!value) {
       key = getConversionRateKey(to, from);
       value = this.#conversionRates.get(key);
 
-      if (value) {
+      if (value && typeof value === 'string') {
+        value = 1 / parseFloat(value);
+      } else if (value && typeof value === 'number') {
         value = 1 / value;
       }
     }
@@ -236,11 +240,32 @@ export default class Money implements ProxyHandler<Money> {
     return value;
   }
 
+  hasConversionRate(to: string): boolean {
+    let key = getConversionRateKey(this.getCurrency(), to);
+    let keyInverse = getConversionRateKey(to, this.getCurrency());
+    return (
+      this.#conversionRates.has(key) || this.#conversionRates.has(keyInverse)
+    );
+  }
+
   /* ---------------------------------
    * User facing functions (display)
    * ---------------------------------*/
 
-  round(to: number): string {
+  round(to?: number): string {
+    to = to ?? this.display;
     return this.#preciseNumber.round(to);
+  }
+
+  toString() {
+    return this.round();
+  }
+
+  toJSON() {
+    return this.round();
+  }
+
+  valueOf(): bigint {
+    return this.#preciseNumber.integer;
   }
 }

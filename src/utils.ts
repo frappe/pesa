@@ -1,6 +1,14 @@
 export type ScalerInput = string | number;
 
+function replaceDelimiters(value: ScalerInput) {
+  if (typeof value === 'string') {
+    return value.replace(/[_,]/g, '');
+  }
+  return value;
+}
+
 export function scaler(value: ScalerInput, precision: number): bigint {
+  value = replaceDelimiters(value);
   throwIfNotValid(value);
   value = stripZeros(value);
   const fractionalLength = getFractionalLength(value);

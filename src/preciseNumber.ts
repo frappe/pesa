@@ -123,23 +123,25 @@ export default class PreciseNumber {
 
     const diff = to - this.#precision;
     const isNeg = this.#value < 0;
-    const stringRep = this.#value.toString().slice(isNeg ? 1 : 0);
-
+    let stringRep = this.#value.toString().slice(isNeg ? 1 : 0);
+    if(stringRep.length < this.precision) {
+      stringRep = '0'.repeat(this.precision - stringRep.length) + stringRep
+    }
     const dpoint = stringRep.length - this.precision;
-    const whole = stringRep.slice(0, dpoint);
+    const whole = stringRep.slice(0, dpoint) || '0';
     const fraction = stringRep.slice(dpoint);
-
     const trailingZeros = '0'.repeat(Math.max(0, diff));
     const roundingDigit = (parseInt(fraction[to]) || 0) > 4 ? 1n : 0n;
-    const lowPrescisionRep = (
+    let lowPrescisionRep = (
       BigInt(whole + fraction.slice(0, to) + trailingZeros) + roundingDigit
     ).toString();
-
+    if(lowPrescisionRep.length < to) {
+      lowPrescisionRep = '0'.repeat(to - lowPrescisionRep.length) + lowPrescisionRep
+    }
     const newDpoint = lowPrescisionRep.length - to;
-    const newWhole = lowPrescisionRep.slice(0, newDpoint);
+    const newWhole = lowPrescisionRep.slice(0, newDpoint) || '0';
     const newFractional = lowPrescisionRep.slice(newDpoint);
     const tail = '.' + newFractional + '0'.repeat(to - newFractional.length);
-
     return (isNeg ? '-' : '') + newWhole + (tail !== '.' ? tail : '');
   }
 
@@ -153,6 +155,10 @@ export default class PreciseNumber {
 
   set value(value: Input) {
     this.#value = this.#scaleAndConvert(value);
+  }
+
+  get float(): number {
+    return this.value;
   }
 
   get integer(): bigint {
