@@ -238,16 +238,25 @@ export default class Money {
 
     const splits = values.slice(0, final).map((v) => {
       const rounded = this.#preciseNumber.mul(v / 100).round(round || DEF_DISP);
-      return this.#copySelf(rounded)
+      return this.#copySelf(rounded);
     });
-    
-    if(isFull) {
-      const sum = splits.reduce((a,b)=>a.add(b)).round(round);
-      const finalMoney = this.#copySelf(this.round(round)).sub(sum)
-      splits.push(finalMoney)
+
+    if (isFull) {
+      const sum = splits.reduce((a, b) => a.add(b)).round(round);
+      const finalMoney = this.#copySelf(this.round(round)).sub(sum);
+      splits.push(finalMoney);
     }
 
     return splits;
+  }
+
+  clip(to?: number): Money {
+    to = to ?? this.display;
+    return this.#copySelf(this.#preciseNumber.clip(to), this.#currency);
+  }
+
+  copy(): Money {
+    return this.#copySelf(this.#preciseNumber.copy(), this.#currency);
   }
 
   /* ---------------------------------

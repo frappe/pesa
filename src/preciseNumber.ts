@@ -146,6 +146,16 @@ export default class PreciseNumber {
     return (isNeg ? '-' : '') + newWhole + (tail !== '.' ? tail : '');
   }
 
+  clip(to: number) {
+    return new PreciseNumber(this.round(to), this.#precision);
+  }
+
+  copy() {
+    const pn = new PreciseNumber(0, this.#precision);
+    pn._setInnerValue(this.#value);
+    return pn;
+  }
+
   /* ---------------------------------
    * Getters and Setters
    * ---------------------------------*/
@@ -295,7 +305,7 @@ export default class PreciseNumber {
   isNegative(): boolean {
     return this.#value < 0n;
   }
-  
+
   isZero(): boolean {
     return this.#value === 0n;
   }
