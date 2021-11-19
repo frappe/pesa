@@ -26,6 +26,23 @@ export default class PreciseNumber {
    * Private methods
    * ---------------------------------*/
 
+  #throwIfInvalidInput(...values: (Input | bigint)[]) {
+    values.forEach((value) => {
+      if (value === 0 || value === 0n) {
+        return;
+      }
+
+      if (
+        Number.isNaN(value) ||
+        value === Infinity ||
+        value === -Infinity ||
+        !value
+      ) {
+        throw Error(`invalid value ${value} found`);
+      }
+    });
+  }
+
   #scaleAndConvert(value: Input): bigint {
     if (value instanceof PreciseNumber) {
       return matchPrecision(value.integer, value.precision, this.precision);
@@ -44,6 +61,7 @@ export default class PreciseNumber {
   }
 
   #executeOperation(operator: Operator, ...values: Input[]): PreciseNumber {
+    this.#throwIfInvalidInput(...values);
     const neutralizer: bigint = 10n ** BigInt(this.#precision);
     const prAmounts: bigint[] = values.map(this.#scaleAndConvert, this);
     const finalAmount: bigint = prAmounts.reduce((a, b) => {
@@ -71,6 +89,7 @@ export default class PreciseNumber {
     valueA: Input,
     valueB: Input
   ): boolean {
+    this.#throwIfInvalidInput(valueA, valueB);
     const prAmountA = this.#scaleAndConvert(valueA);
     const prAmountB = this.#scaleAndConvert(valueB);
     switch (comparator) {
@@ -115,10 +134,12 @@ export default class PreciseNumber {
   }
 
   _setInnerValue(value: bigint) {
+    this.#throwIfInvalidInput(value);
     this.#value = value;
   }
 
   round(to: number): string {
+    this.#throwIfInvalidInput(to);
     to = to >= 0 ? to : 0;
 
     const diff = to - this.#precision;
@@ -147,6 +168,7 @@ export default class PreciseNumber {
   }
 
   clip(to: number) {
+    this.#throwIfInvalidInput(to);
     return new PreciseNumber(this.round(to), this.#precision);
   }
 
@@ -165,6 +187,7 @@ export default class PreciseNumber {
   }
 
   set value(value: Input) {
+    this.#throwIfInvalidInput(value);
     this.#value = this.#scaleAndConvert(value);
   }
 

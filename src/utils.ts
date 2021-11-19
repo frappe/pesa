@@ -116,3 +116,7 @@ export function matchPrecision(
   }
   return value;
 }
+
+export function throwRateNotProvided(from: string, to: string) {
+  throw Error(`rate not provided for conversion from ${from} to ${to}`);
+}

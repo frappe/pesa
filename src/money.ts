@@ -1,6 +1,10 @@
 import PreciseNumber from './preciseNumber';
 import { DEF_PREC, DEF_DISP } from './consts';
-import { getConversionRateKey, throwIfInvalidCurrencyCode } from './utils';
+import {
+  getConversionRateKey,
+  throwIfInvalidCurrencyCode,
+  throwRateNotProvided,
+} from './utils';
 
 type Input = PreciseNumber | number | string;
 type ArithmeticInput = Money | number | string;
@@ -111,17 +115,25 @@ export default class Money {
       let finalRate;
       if (rate) {
         finalRate = rate;
-      } else if (valueIsMoney) {
-        try {
-          finalRate = value.getConversionRate(currency, this.#currency);
-        } catch {
-          finalRate = this.getConversionRate(currency, this.#currency);
-        }
-      } else {
-        finalRate = this.getConversionRate(currency, this.#currency);
       }
 
-      rhs = rhs.mul(finalRate);
+      if (!finalRate && valueIsMoney) {
+        try {
+          finalRate = value.getConversionRate(currency, this.#currency);
+        } catch {}
+      }
+
+      if (!finalRate) {
+        try {
+          finalRate = this.getConversionRate(currency, this.#currency);
+        } catch {}
+      }
+
+      if (!finalRate) {
+        throwRateNotProvided(currency, this.#currency);
+      }
+
+      rhs = rhs.mul(finalRate ?? 1); // will never be one cause error if undefined
     }
 
     let lhs = this.#preciseNumber;
@@ -146,9 +158,7 @@ export default class Money {
     }
 
     if (typeof input === 'string' && typeof rate === 'undefined') {
-      throw Error(
-        `rate not provided for conversion from ${this.#currency} to ${input}`
-      );
+      throwRateNotProvided(this.#currency, input);
     }
 
     let settings: RateSetting[];

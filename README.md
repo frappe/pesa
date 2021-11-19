@@ -48,8 +48,8 @@ _(check this talk by [Bartek Szopka](https://www.youtube.com/watch?v=MqHDDtVYJRI
     3. [Immutability](#immutability)
     4. [Chaining](#chaining)
 3. [Documentation](#documentation)
-    1. [Arithmetic Functions](#arithmetic)
-    2. [Comparison Functions](#comparisons)
+    1. [Arithmetic Functions](#arithmetic-functions)
+    2. [Comparison Functions](#comparison-functions)
     3. [Check Functions](#check-functions)
     4. [Other Calculations](#other-calculations)
     5. [Display](#display)
@@ -266,6 +266,7 @@ all the following documentation pertain to the methods and parameters of this cl
 
 Operations that involve the value of two `Money` objects and return a new `Money` object as the result.
 
+
 Function signature
 ```typescript
 [operationName](value: Input, currency?: string, rate?: number) : Money;
@@ -277,9 +278,14 @@ Example:
 ```javascript
 money = pesa(200, 'USD');
 
-money.add(150);
-money.sub(150, 'INR', 75);
+money.add(150).round();
+// '350.000'
+
+money.sub(150, 'INR', 0.013);
+// '198.050'
 ```
+
+_**Note**: The `rate` argument here is from the `currency` given in the function to the calling objects `currency`. So in the above example `rate` of 0.013 is for converting `'INR'` to `'USD'`. The reason for this is to prevent precision loss due to reciprocal._
 
 #### Arguments (arithmetic)
 |name|description|example|
@@ -318,11 +324,16 @@ type Input = Money | number | string;
 
 Example:
 ```javascript
-money = pesa(2, 'USD');
+money = pesa(150, 'INR');
 
-money.eq(150, 'INR', 75);
+money.eq(2, 'USD', 75);
+// true
+
 money.lte(200);
+// true
 ```
+
+_**Note**: The `rate` argument here is from the `currency` given in the function to the calling objects `currency`. So in the above example `rate` of 75 is for converting `'USD'` to `'INR'`. The reason for this is to prevent precision loss due to reciprocal._
 
 #### Arguments (comparison)
 
