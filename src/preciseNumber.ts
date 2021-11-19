@@ -124,8 +124,8 @@ export default class PreciseNumber {
     const diff = to - this.#precision;
     const isNeg = this.#value < 0;
     let stringRep = this.#value.toString().slice(isNeg ? 1 : 0);
-    if(stringRep.length < this.precision) {
-      stringRep = '0'.repeat(this.precision - stringRep.length) + stringRep
+    if (stringRep.length < this.precision) {
+      stringRep = '0'.repeat(this.precision - stringRep.length) + stringRep;
     }
     const dpoint = stringRep.length - this.precision;
     const whole = stringRep.slice(0, dpoint) || '0';
@@ -135,8 +135,9 @@ export default class PreciseNumber {
     let lowPrescisionRep = (
       BigInt(whole + fraction.slice(0, to) + trailingZeros) + roundingDigit
     ).toString();
-    if(lowPrescisionRep.length < to) {
-      lowPrescisionRep = '0'.repeat(to - lowPrescisionRep.length) + lowPrescisionRep
+    if (lowPrescisionRep.length < to) {
+      lowPrescisionRep =
+        '0'.repeat(to - lowPrescisionRep.length) + lowPrescisionRep;
     }
     const newDpoint = lowPrescisionRep.length - to;
     const newWhole = lowPrescisionRep.slice(0, newDpoint) || '0';
@@ -281,6 +282,22 @@ export default class PreciseNumber {
 
   static lte(valueA: Input, valueB: Input): boolean {
     return new this(valueA).lte(valueB);
+  }
+
+  /* ---------------------------------
+   * Checks
+   * ---------------------------------*/
+
+  isPositive(): boolean {
+    return this.#value > 0n;
+  }
+
+  isNegative(): boolean {
+    return this.#value < 0n;
+  }
+  
+  isZero(): boolean {
+    return this.#value === 0n;
   }
 
   /* ---------------------------------

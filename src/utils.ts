@@ -92,13 +92,15 @@ export function getIsCurrencyCode(code: string): boolean {
   return !!code.match(/^[A-Z]{3}$/);
 }
 
+export function throwIfInvalidCurrencyCode(code: string) {
+  if (!getIsCurrencyCode(code)) {
+    throw Error(`invalid currency code '${code}'`);
+  }
+}
+
 export function getConversionRateKey(from: string, to: string) {
   const keys = [from, to];
-  keys.forEach((key) => {
-    if (!getIsCurrencyCode(key)) {
-      throw Error(`invalid currency code '${key}'`);
-    }
-  });
+  keys.forEach(throwIfInvalidCurrencyCode);
   return keys.join('-');
 }
 

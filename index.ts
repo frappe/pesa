@@ -19,13 +19,13 @@ export function pesa(value: Input = 0, options: Config = {}): Money {
 }
 
 export function getPreciseNumberMaker(precision: number = DEF_PREC) {
-  return function (value: Input) {
-    return p(value, precision);
+  return function (value: Input, innerPrecision?: number) {
+    return p(value, innerPrecision ?? precision);
   };
 }
 
 export function getMoneyMaker(options: Config = {}) {
-  return function (value: Input) {
-    return pesa(value, options);
+  return function (value: Input, innerOptions?: Config) {
+    return pesa(value, innerOptions ?? options);
   };
 }

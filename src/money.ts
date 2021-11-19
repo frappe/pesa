@@ -1,17 +1,23 @@
 import PreciseNumber from './preciseNumber';
 import { DEF_PREC, DEF_DISP } from './consts';
-import { getConversionRateKey } from './utils';
-
-export interface Options {
-  precision?: number;
-  currency?: string;
-  display?: number;
-}
+import { getConversionRateKey, throwIfInvalidCurrencyCode } from './utils';
 
 type Input = PreciseNumber | number | string;
 type ArithmeticInput = Money | number | string;
 type Rate = string | number;
 type ConversionRateMap = Map<string, Rate>;
+interface RateSetting {
+  from: string;
+  to: string;
+  rate: Rate;
+}
+
+export interface Options {
+  precision?: number;
+  currency?: string;
+  display?: number;
+  rates?: RateSetting | RateSetting[];
+}
 
 export default class Money {
   display: number;
@@ -24,9 +30,18 @@ export default class Money {
       amount,
       options.precision ?? DEF_PREC
     );
-    this.#currency = options.currency ?? '';
+
+    this.#currency = '';
     this.#conversionRates = new Map();
     this.display = options.display ?? DEF_DISP;
+
+    const { currency, rates } = options;
+    if (currency) {
+      this.currency(currency);
+    }
+    if (rates) {
+      this.rate(rates);
+    }
   }
 
   /* ---------------------------------
@@ -70,14 +85,14 @@ export default class Money {
     }
   }
 
-  #copySelf(preciseNumber: PreciseNumber, currency: string = ''): Money {
+  #copySelf(value: PreciseNumber | string, currency: string = ''): Money {
     const options = {
       currency: currency || this.#currency,
       precision: this.#preciseNumber.precision,
       display: this.display,
     };
 
-    const result = new Money(preciseNumber, options);
+    const result = new Money(value, options);
     result._setConversionRates(this.#conversionRates);
     return result;
   }
@@ -119,15 +134,46 @@ export default class Money {
 
   currency(value: string) {
     if (!this.#currency) {
+      throwIfInvalidCurrencyCode(value);
       this.#currency = value;
     }
     return this;
   }
 
-  rate(to: string, value: Rate) {
-    this.#throwCurrencyNotSetIfNotSet();
-    const key = getConversionRateKey(this.#currency, to);
-    this.#conversionRates.set(key, value);
+  rate(input: string | RateSetting | RateSetting[], rate?: Rate) {
+    if (typeof input === 'string') {
+      this.#throwCurrencyNotSetIfNotSet();
+    }
+
+    if (typeof input === 'string' && typeof rate === 'undefined') {
+      throw Error(
+        `rate not provided for conversion from ${this.#currency} to ${input}`
+      );
+    }
+
+    let settings: RateSetting[];
+    if (input instanceof Array) {
+      settings = input;
+    } else if (typeof input === 'string') {
+      settings = [
+        {
+          from: this.#currency,
+          to: input,
+          rate: rate ?? 1, // It will never be '1' there's a guard clause.
+        },
+      ];
+    } else if (input instanceof Object) {
+      settings = [input];
+    } else {
+      throw Error(`invalid input to rate: ${input}`);
+    }
+
+    for (let setting of settings) {
+      const { from, to, rate } = setting;
+      const key = getConversionRateKey(from, to);
+      this.#conversionRates.set(key, rate);
+    }
+
     return this;
   }
 
@@ -177,8 +223,31 @@ export default class Money {
     return this.#copySelf(outPreciseNumber);
   }
 
+  /* ---------------------------------
+   * User facing functions (chainable, other calcs)
+   * ---------------------------------*/
+
   percent(value: number): Money {
     return this.#copySelf(this.#preciseNumber.mul(value / 100));
+  }
+
+  split(values: number[], round?: number): Money[] {
+    round = round ?? this.display;
+    const isFull = values.reduce((a, b) => a + b) === 100;
+    const final = isFull ? values.length - 1 : values.length;
+
+    const splits = values.slice(0, final).map((v) => {
+      const rounded = this.#preciseNumber.mul(v / 100).round(round || DEF_DISP);
+      return this.#copySelf(rounded)
+    });
+    
+    if(isFull) {
+      const sum = splits.reduce((a,b)=>a.add(b)).round(round);
+      const finalMoney = this.#copySelf(this.round(round)).sub(sum)
+      splits.push(finalMoney)
+    }
+
+    return splits;
   }
 
   /* ---------------------------------
@@ -208,6 +277,22 @@ export default class Money {
   lte(value: ArithmeticInput, currency?: string, rate?: number): boolean {
     const { lhs, rhs } = this.#convertInput(value, currency, rate);
     return lhs.lte(rhs);
+  }
+
+  /* ---------------------------------
+   * User facing functions (non-chainable, checks)
+   * ---------------------------------*/
+
+  isPositive(): boolean {
+    return this.#preciseNumber.integer > 0n;
+  }
+
+  isNegative(): boolean {
+    return this.#preciseNumber.integer < 0n;
+  }
+
+  isZero(): boolean {
+    return this.#preciseNumber.integer === 0n;
   }
 
   /* ---------------------------------
