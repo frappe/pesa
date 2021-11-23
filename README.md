@@ -9,8 +9,6 @@
 
 A money handling library for JavaScript that can handle USD to VEF conversions for Jeff without breaking a sweat!
 
-#### `note this lib is still in dev, you can't use it right now, a few tests are left`
-
 ---
 
 ```javascript
@@ -405,13 +403,13 @@ pesa(200, 'USD').percent(50).round(2);
 
 
 #### `split`
-Function that returns an array of `Money` objects that splits the underlying value into the given percentages.
+Function that splits the underlying value into given list of percentages or `n` equal parts and returns an array of `Money` objects.
 
-The sum of `values` should not exceed `100`. Argument `round` is used to decide at what precision the sum of all returned will equate to the calling objects value. If `round` is not passed then the calling object's `display` value is used.
+The sum of `values` can exceed `100`. Argument `round` is used to decide at what precision the sum of all returned will equate to the calling objects value. If `round` is not passed then the calling object's `display` value is used.
 
 Function signature:
 ```typescript
-split(values: number[], round?: number): Money[];
+split(values: number | number[], round?: number): Money[];
 ```
 
 Example:
@@ -421,6 +419,9 @@ pesa(200.99).split([33, 66, 1]).map(m => m.float);
 
 pesa(200.99).split([33, 66, 1], 2).map(m => m.float);
 // [66.33, 132.65, 2.01]
+
+pesa(100).split(3).map(m => m.float);
+// [33.333, 33.333, 33.334]
 ```
 
 

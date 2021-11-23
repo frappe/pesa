@@ -246,22 +246,34 @@ describe('Money', function () {
     describe('split', function () {
       const sum = (list: number[]) => list.reduce((a, b) => a + b);
       const money = pesa(200, 'USD');
-      specify('even splits', function () {
-        const splits = money.split([60, 40]).map((m) => m.float);
-        assert.strictEqual(splits[0], 120);
-        assert.strictEqual(splits[1], 80);
-        assert.strictEqual(sum(splits), money.float);
-      });
 
-      [0, 1, 2, 4, 6].forEach((d) => {
-        specify(`uneven splits 0, d: ${d}`, function () {
-          const splits = money.split([33, 33, 34], d).map((m) => m.float);
+      describe('percent list input', function () {
+        specify('even splits', function () {
+          const splits = money.split([60, 40]).map((m) => m.float);
+          assert.strictEqual(splits[0], 120);
+          assert.strictEqual(splits[1], 80);
           assert.strictEqual(sum(splits), money.float);
         });
 
-        specify(`uneven splits 1, d: ${d}`, function () {
-          const splits = money.split([49.99, 50.01], d).map((m) => m.float);
-          assert.strictEqual(sum(splits), money.float);
+        [0, 1, 2, 4, 6].forEach((d) => {
+          specify(`uneven splits 0, d: ${d}`, function () {
+            const splits = money.split([33, 33, 34], d).map((m) => m.float);
+            assert.strictEqual(sum(splits), money.float);
+          });
+
+          specify(`uneven splits 1, d: ${d}`, function () {
+            const splits = money.split([49.99, 50.01], d).map((m) => m.float);
+            assert.strictEqual(sum(splits), money.float);
+          });
+        });
+      });
+
+      describe('number input', function () {
+        [2, 3, 5, 6, 8, 10].forEach((n) => {
+          specify(`n: ${n}`, function () {
+            const splits = money.split(n).map((m) => m.float);
+            assert.strictEqual(sum(splits), money.float);
+          });
         });
       });
     });

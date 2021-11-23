@@ -241,14 +241,30 @@ export default class Money {
     return this.#copySelf(this.#preciseNumber.mul(value / 100));
   }
 
-  split(values: number[], round?: number): Money[] {
+  split(values: number | number[], round?: number): Money[] {
     round ??= this.display;
-    const isFull =
-      values.map((v) => new PreciseNumber(v)).reduce((a, b) => a.add(b))
-        .float === 100;
-    const final = isFull ? values.length - 1 : values.length;
+    let percents: number[] = [];
+    if (typeof values === 'number') {
+      const n = values;
+      percents = Array(n - 1)
+        .fill(100 / n)
+        .map(
+          (v) =>
+            new PreciseNumber(v, this.#preciseNumber.precision).clip(
+              round ?? DEF_DISP
+            ).float
+        );
+      percents.push(100 - percents.reduce((a, b) => a + b));
+    } else if (values instanceof Array) {
+      percents = values;
+    }
 
-    const splits = values.slice(0, final).map((v) => {
+    const isFull =
+      percents.map((v) => new PreciseNumber(v)).reduce((a, b) => a.add(b))
+        .float === 100;
+    const final = isFull ? percents.length - 1 : percents.length;
+
+    const splits = percents.slice(0, final).map((v) => {
       const rounded = this.#preciseNumber.mul(v / 100).round(round ?? DEF_DISP);
       return this.#copySelf(rounded);
     });
