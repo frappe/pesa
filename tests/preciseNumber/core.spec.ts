@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 import 'mocha';
 import {
-  ScalerInput,
-  scaler,
-  getIsInputValid,
   getFractionalLength,
+  getIsInputValid,
+  scaler,
+  ScalerInput,
   toDecimalString,
 } from '../../src/utils';
 

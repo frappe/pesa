@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 import 'mocha';
-import { Input } from '../types';
 import { p } from '../../index';
-import { MIN_PREC, DEF_PREC, MAX_PREC } from '../../src/consts';
+import { DEF_PREC, MAX_PREC, MIN_PREC } from '../../src/consts';
+import { Input } from '../types';
 
 interface Test {
   input: Input;
@@ -62,6 +62,12 @@ describe('PreciseNumber, Maker', function () {
       getVals('.00200', 3, 0.002, 2n),
       getVals(-0.002, 3, -0.002, -2n),
       getVals('-00.002', 3, -0.002, -2n),
+      getVals(
+        '200_000_000_000_000.18',
+        2,
+        200000000000000.16,
+        20000000000000018n
+      ), // kilo Jeff
     ];
 
     for (let test of testThese) {
@@ -83,8 +89,8 @@ describe('PreciseNumber, Maker', function () {
       getInvalidVals('.', DEF_PREC),
       getInvalidVals('2.555.5', DEF_PREC),
       getInvalidVals('.555.5', DEF_PREC),
-      getInvalidVals('1,000,000.000', DEF_PREC),
-      getInvalidVals('1_000_000.000', DEF_PREC),
+      getInvalidVals('1|000|000.000', DEF_PREC),
+      getInvalidVals('1-000-000.000', DEF_PREC),
     ];
     for (let test of testThese) {
       const { input, precision } = test;
@@ -100,7 +106,7 @@ describe('PreciseNumber, Maker', function () {
 
 describe('PreciseNumber, Other functions', function () {
   context('Round', function () {
-    const testThese: [number, number, string, number][] = [
+    const testThese: [number | string, number, string, number][] = [
       [1234.5678, 4, '1235', -1],
       [1234.5678, 4, '1235', 0],
       [1234.5678, 4, '1234.6', 1],
@@ -117,6 +123,8 @@ describe('PreciseNumber, Other functions', function () {
       [-1234.5678, 4, '-1234.5678', 4],
       [-1234.5678, 4, '-1234.56780', 5],
       [-1234.5678, 4, '-1234.567800', 6],
+      ['200_000_000_000_000.18', 4, '200000000000000.18', 2],
+      ['0.000000031032882086386885', 30, '0.0000000310328820863868850', 25],
     ];
 
     for (let test of testThese) {

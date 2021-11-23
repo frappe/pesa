@@ -1,5 +1,5 @@
+import { DEF_DISP, DEF_PREC } from './consts';
 import PreciseNumber from './preciseNumber';
-import { DEF_PREC, DEF_DISP } from './consts';
 import {
   getConversionRateKey,
   throwIfInvalidCurrencyCode,
@@ -79,7 +79,7 @@ export default class Money {
 
   _setConversionRates(rates: ConversionRateMap) {
     if (Array(...this.#conversionRates.keys()).length === 0) {
-      this.#conversionRates = rates;
+      this.#conversionRates = new Map(rates);
     }
   }
 
@@ -242,12 +242,14 @@ export default class Money {
   }
 
   split(values: number[], round?: number): Money[] {
-    round = round ?? this.display;
-    const isFull = values.reduce((a, b) => a + b) === 100;
+    round ??= this.display;
+    const isFull =
+      values.map((v) => new PreciseNumber(v)).reduce((a, b) => a.add(b))
+        .float === 100;
     const final = isFull ? values.length - 1 : values.length;
 
     const splits = values.slice(0, final).map((v) => {
-      const rounded = this.#preciseNumber.mul(v / 100).round(round || DEF_DISP);
+      const rounded = this.#preciseNumber.mul(v / 100).round(round ?? DEF_DISP);
       return this.#copySelf(rounded);
     });
 
@@ -261,7 +263,7 @@ export default class Money {
   }
 
   clip(to?: number): Money {
-    to = to ?? this.display;
+    to ??= this.display;
     return this.#copySelf(this.#preciseNumber.clip(to), this.#currency);
   }
 
@@ -357,7 +359,7 @@ export default class Money {
    * ---------------------------------*/
 
   round(to?: number): string {
-    to = to ?? this.display;
+    to ??= this.display;
     return this.#preciseNumber.round(to);
   }
 

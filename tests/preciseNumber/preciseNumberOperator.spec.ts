@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import 'mocha';
-import { Input } from '../types';
 import { getPreciseNumberMaker } from '../../index';
+import { Input } from '../types';
 
 export type Operator = 'add' | 'sub' | 'mul' | 'div';
 export interface OperatorTestSingle {

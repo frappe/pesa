@@ -1,5 +1,5 @@
-import { MIN_PREC, DEF_PREC, MAX_PREC } from './consts';
-import { scaler, toDecimalString, matchPrecision } from './utils';
+import { DEF_PREC, MAX_PREC, MIN_PREC } from './consts';
+import { matchPrecision, scaler, toDecimalString } from './utils';
 
 const enum Operator {
   Add = '+',
