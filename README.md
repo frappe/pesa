@@ -103,12 +103,12 @@ _(check this talk by [Bartek Szopka](https://www.youtube.com/watch?v=MqHDDtVYJRI
 
 For `npm` users:
 ```bash
-npm install frappe/pesa
+npm install pesa
 ```
 
 For `yarn` users:
 ```bash
-yarn add frappe/pesa
+yarn add pesa
 ```
 
 [Index](#index)
