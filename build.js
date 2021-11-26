@@ -15,14 +15,6 @@ esbuild.buildSync({
   outfile: 'dist/pesa.cjs',
 });
 
-// Browser build
-esbuild.buildSync({
-  ...commonConfig,
-  target: ['chrome67', 'edge79', 'firefox68', 'safari14'],
-  format: 'iife',
-  platform: 'browser',
-  outfile: 'dist/pesa.js',
-});
 
 // Module build
 esbuild.buildSync({
