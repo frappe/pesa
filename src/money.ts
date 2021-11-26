@@ -380,11 +380,11 @@ export default class Money {
   }
 
   toString() {
-    return this.round();
+    return this.round(this.#preciseNumber.precision);
   }
 
   toJSON() {
-    return this.round();
+    return this.toString();
   }
 
   valueOf(): bigint {
