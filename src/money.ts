@@ -56,6 +56,23 @@ export default class Money {
     return this.#preciseNumber.value;
   }
 
+  get options(): Options {
+    const rates: RateSetting[] = Array.from(this.#conversionRates.keys()).map(
+      (k) => {
+        const [from, to] = k.split('-');
+        const rate = this.#conversionRates.get(k) ?? -1;
+        return { from, to, rate };
+      }
+    );
+
+    return {
+      currency: this.#currency,
+      precision: this.#preciseNumber.precision,
+      display: this.display,
+      rates,
+    };
+  }
+
   get preciseNumber(): PreciseNumber {
     return new PreciseNumber(
       this.#preciseNumber,
