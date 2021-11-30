@@ -16,7 +16,7 @@ const enum Comparator {
   Lte = '<=',
 }
 
-type Input = PreciseNumber | number | string;
+type Input = PreciseNumber | bigint | number | string;
 
 export default class PreciseNumber {
   #precision: number;
@@ -46,6 +46,10 @@ export default class PreciseNumber {
   #scaleAndConvert(value: Input): bigint {
     if (value instanceof PreciseNumber) {
       return matchPrecision(value.integer, value.precision, this.precision);
+    }
+
+    if (typeof value === 'bigint') {
+      return value;
     }
 
     return scaler(value, this.#precision);

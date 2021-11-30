@@ -6,7 +6,7 @@ import {
   throwRateNotProvided,
 } from './utils';
 
-type Input = PreciseNumber | number | string;
+type Input = PreciseNumber | bigint | number | string;
 type ArithmeticInput = Money | number | string;
 type Rate = string | number;
 type ConversionRateMap = Map<string, Rate>;

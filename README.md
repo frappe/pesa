@@ -147,9 +147,9 @@ const pesa = getMoneyMaker(options);
 const money = pesa(200);
 ```
 
-#### Options
+#### Options and Value
 
-Options are optional, but currency has to be set before any conversions can take place.
+**Options** are optional, but currency has to be set before any conversions can take place.
 
 ```typescript
 interface Options {
@@ -164,6 +164,25 @@ interface RateSetting {
   to: string;
   rate: string | number;
 }
+```
+
+**Value** can be a `string`, `number` or a `bigint`. If value is not passed the value is set as 0.
+
+```typescript
+type Value = string | number | bigint;
+```
+
+If `bigint` is passed then it doesn't undergo any conversion or scaling and is used to set the internal `bigint`.
+
+```javascript
+pesa(235).internal
+// { bigint: 235000000n, precision: 6 }
+
+pesa('235').internal
+// { bigint: 235000000n, precision: 6 }
+
+pesa(235n).internal
+// { bigint: 235n, precision: 6 }
 ```
 
 ### Currency and Conversions

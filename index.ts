@@ -1,8 +1,8 @@
+import { DEF_PREC } from './src/consts';
 import Money, { Options } from './src/money';
 import PreciseNumber from './src/preciseNumber';
-import { DEF_PREC } from './src/consts';
 
-type Input = number | string;
+type Input = bigint | number | string;
 type Currency = string;
 type Config = Options | Currency;
 

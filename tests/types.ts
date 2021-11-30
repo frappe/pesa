@@ -1,1 +1,1 @@
-export type Input = number | string;
+export type Input = bigint | number | string;

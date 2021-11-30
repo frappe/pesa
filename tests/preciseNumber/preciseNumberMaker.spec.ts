@@ -68,6 +68,7 @@ describe('PreciseNumber, Maker', function () {
         200000000000000.16,
         20000000000000018n
       ), // kilo Jeff
+      getVals(2n, 3, 0.002, 2n),
     ];
 
     for (let test of testThese) {
