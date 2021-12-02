@@ -29,14 +29,14 @@ Because JavaScript numbers full of fun foibles such as these:
 9007199254740992 + 1
 // 9007199254740992
 ```
-Using them for financial transactions will most likely lead to technical bankruptcy.
+Using them for financial transactions will most likely lead to technical bankruptcy [[1](#credits)].
 
 _(check this talk by [Bartek Szopka](https://www.youtube.com/watch?v=MqHDDtVYJRI) to understand why JS numbers are like this)_
 
 **`pesa`** circumvents this by conducting scaled integer operations using JS [`BigInt`](https://github.com/tc39/proposal-bigint) instead of `Number`. This allows for arithmetic involving arbitrarily large numbers with unnecessarily high precision.
 
 ## Index
-<details open>
+<details>
 <summary><code>show/hide</code></summary>
 
 1. [Installation](#installation)
@@ -875,3 +875,6 @@ A few good alternatives to **`pesa`** that solve a similar problem.
 > Why a create another Money lib if these already exists?!
 
 They either didn't use `bigint` (_[megaJeff](#mega-jeff-in-venezuela) sad_) or had too verbose an API.
+
+## Credits
+1. These are [Ankush's](http://github.com/ankush) wise words of wisdom. These words instilled fear of the JS `Number` in me. Thank you Ankush.
