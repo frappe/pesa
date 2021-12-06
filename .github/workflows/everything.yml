@@ -1,0 +1,20 @@
+name: Everything
+
+on: [push, pull_request]
+
+jobs:
+  everything:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-versions: '16.4.0'
+      - name: Instal dev-dependencies
+        run: yarn --frozen-lockfile
+      - name: Checking typing and formatting
+        run: yarn run check
+      - name: Running build
+        run: yarn run build
+      - name: Running tests
+        run: yarn run test
