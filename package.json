@@ -10,6 +10,7 @@
   "scripts": {
     "check": "prettier --check . && tsc --noEmit",
     "test": "mocha --reporter nyan --require ts-node/register tests/**/*.spec.ts",
+    "testci": "mocha --reporter spec --require ts-node/register tests/**/*.spec.ts",
     "build": "tsc --emitDeclarationOnly && rm -rf dist/types/tests && node build.js",
     "format": "prettier --write ."
   },

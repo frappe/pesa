@@ -17,4 +17,4 @@ jobs:
       - name: Running build
         run: yarn run build
       - name: Running tests
-        run: yarn run test
+        run: yarn run testci
