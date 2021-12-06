@@ -15,7 +15,6 @@ esbuild.buildSync({
   outfile: 'dist/pesa.cjs',
 });
 
-
 // Module build
 esbuild.buildSync({
   ...commonConfig,

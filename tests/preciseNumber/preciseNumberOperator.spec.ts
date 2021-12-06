@@ -65,7 +65,6 @@ describe('PreciseNumber, Operators', function () {
       });
     }
   });
-  
 
   context('Checking immutability', function () {
     const precision = 6;
