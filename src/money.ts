@@ -3,7 +3,7 @@ import PreciseNumber from './preciseNumber';
 import {
   getConversionRateKey,
   throwIfInvalidCurrencyCode,
-  throwRateNotProvided,
+  throwRateNotProvided
 } from './utils';
 
 type Input = PreciseNumber | bigint | number | string;
@@ -397,14 +397,14 @@ export default class Money {
   }
 
   toString() {
-    return this.round(this.#preciseNumber.precision);
+    return this.#preciseNumber.toString();
   }
 
   toJSON() {
-    return this.toString();
+    return this.#preciseNumber.toJSON();
   }
 
   valueOf(): bigint {
-    return this.#preciseNumber.integer;
+    return this.#preciseNumber.valueOf();
   }
 }
