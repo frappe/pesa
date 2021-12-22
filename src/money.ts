@@ -3,7 +3,7 @@ import PreciseNumber from './preciseNumber';
 import {
   getConversionRateKey,
   throwIfInvalidCurrencyCode,
-  throwRateNotProvided
+  throwRateNotProvided,
 } from './utils';
 
 type Input = PreciseNumber | bigint | number | string;

@@ -57,12 +57,12 @@ _(check this talk by [Bartek Szopka](https://www.youtube.com/watch?v=MqHDDtVYJRI
    8. [Internals](#internals)
 4. [Additional Notes](#additional-notes)
    1. [Storing The Value](#storing-the-value)
-   1. [Non-Money Stuff](#non-money-stuff)
-   2. [Support](#Support)
-   3. [Precision vs Display](#precision-vs-display)
-   4. [Why High Precision](#why-high-precision)
-   5. [Implicit Conversions](#implicit-conversions)
-   6. [Use Cases](#use-cases)
+   2. [Non-Money Stuff](#non-money-stuff)
+   3. [Support](#Support)
+   4. [Precision vs Display](#precision-vs-display)
+   5. [Why High Precision](#why-high-precision)
+   6. [Implicit Conversions](#implicit-conversions)
+   7. [Use Cases](#use-cases)
 5. [Alternatives](#alternatives)
 
 </details>
@@ -519,7 +519,7 @@ pesa(200).round(2);
 Property that displays a precision intact string representation of the value.
 
 ```javascript
-pesa(200, { precision: 7 }).store
+pesa(200, { precision: 7 }).store;
 // '200.0000000'
 ```
 
@@ -711,12 +711,13 @@ The returned object is that of the javascript `Map` class, which has the followi
 Additional notes pertaining to this lib.
 
 ### Storing The Value
+
 Since a `Money` constitutes of 2 values for the number: 1. the `precision`, and 2. the `value`. Storing this would require two cells, but this would be incredible stupid cause fractional numbers have already solved this with the decimal point.
 
 We can use the `store` property to get a string representation where the mantissa length gives the precision irrespective of the significant digits.
 
 ```javascript
-pesa(0, { precision: 4 }).store
+pesa(0, { precision: 4 }).store;
 // '0.0000'
 ```
 
