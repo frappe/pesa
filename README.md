@@ -56,6 +56,7 @@ _(check this talk by [Bartek Szopka](https://www.youtube.com/watch?v=MqHDDtVYJRI
    7. [Non Chainable Methods](#non-chainable-methods)
    8. [Internals](#internals)
 4. [Additional Notes](#additional-notes)
+   1. [Storing The Value](#storing-the-value)
    1. [Non-Money Stuff](#non-money-stuff)
    2. [Support](#Support)
    3. [Precision vs Display](#precision-vs-display)
@@ -87,6 +88,7 @@ _(check this talk by [Bartek Szopka](https://www.youtube.com/watch?v=MqHDDtVYJRI
 5. [Display](#display)
    - [`float`](#float)
    - [`round`](#round)
+   - [`store`](#store)
 6. [Chainable Methods](#chainable-methods)
    - [`currency`](#currency)
    - [`rate`](#rate)
@@ -512,6 +514,15 @@ pesa(200).round(2);
 // '200.00'
 ```
 
+#### `store`
+
+Property that displays a precision intact string representation of the value.
+
+```javascript
+pesa(200, { precision: 7 }).store
+// '200.0000000'
+```
+
 ### Chainable Methods
 
 These methods are used to set some value and return the `Money` object itself so that other functions can be called on it.
@@ -698,6 +709,18 @@ The returned object is that of the javascript `Map` class. Which has the followi
 ## Additional Notes
 
 Additional notes pertaining to this lib.
+
+### Storing The Value
+Since a `Money` constitutes of 2 values for the number: 1. the `precision`, and 2. the `value`. Storing this would require two cells, but this would be incredible stupid cause fractional numbers have already solved this with the decimal point.
+
+We can use the `store` property to get a string representation where the mantissa length gives the precision irrespective of the significant digits.
+
+```javascript
+pesa(0, { precision: 4 }).store
+// '0.0000'
+```
+
+You still have to deal with the `currency` though. Also if your db doesn't have a decimal type (I'm looking at you SQLite), then you'll have to store this as a string and cast it before operations.
 
 ### Non-Money Stuff
 
