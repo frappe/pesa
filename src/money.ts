@@ -90,6 +90,11 @@ export default class Money {
     return new Map(this.#conversionRates);
   }
 
+  get store(): string {
+    const { precision } = this.#preciseNumber;
+    return this.#preciseNumber.round(precision);
+  }
+
   /* ---------------------------------
    * Internal functions
    * ---------------------------------*/
