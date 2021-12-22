@@ -124,7 +124,7 @@ pesa(200, 'USD').add(250, 'INR', 75).percent(50).round(3);
 // '9475.000'
 ```
 
-This section describes the usage in brief. For more detail check the [Documentation](#documentation) section. For moar detail, check the code or raise an issue.
+This section describes the usage in brief. For more details, check the [Documentation](#documentation) section. For even more details, check the source code or raise an issue.
 
 [Index](#index)
 
@@ -287,7 +287,7 @@ Calling the main function `pesa` returns an object of the `Money` class.
 const money: Money = pesa(200, 'USD');
 ```
 
-all the following documentation pertain to the methods and parameters of this class.
+The rest of the documentation pertains to the methods and parameters of this class.
 
 ### Arithmetic Functions
 
@@ -467,7 +467,7 @@ Functions and parameters used to display the `Money` object's value.
 
 > Does this support formatting?
 
-Nope, but you can the [ECMAScript Internationalization API](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat) to handle formatting for you. The `NumberFormat` constructor can be configured to your needs then you can pass `Money#float` to it's format method.
+Nope, but you can use the [ECMAScript Internationalization API](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat) to handle formatting for you. The `NumberFormat` constructor can be configured to your needs then you can pass `Money#float` to it's format method.
 
 ```javascript
 const numberFormat = new Intl.NumberFormat('en-US', {
@@ -545,7 +545,7 @@ pesa(200).currency('INR');
 
 #### `rate`
 
-This is used to set a single or multiple conversion rates. If input is a string then the it is assumed the the conversion rate is from the calling objects `currency` to the string `input` passed as the first parameter with a value of `rate`. You can be more explicit by passing an object.
+This is used to set a single or multiple conversion rates. If input is a string then it is assumed that the conversion rate is from the calling objects `currency` to the string `input` passed as the first parameter with a value of `rate`. You can be more explicit by passing an object.
 
 Function signature:
 
@@ -641,7 +641,7 @@ pesa(200, 'INR').getCurrency();
 
 #### `getConversionRate`
 
-This will return the stored conversion rate for the given arguments. If no conversion rate is found it will throw an error. If conversion rate is stored for _from A to B_, fetching the conversion rate for _from B to A_ will return the reciprocal unless it is explicitly set.
+This will return the stored conversion rate for the given arguments. If no conversion rate is found, it will throw an error. If conversion rate is stored for _from A to B_, fetching the conversion rate for _from B to A_ will return the reciprocal unless it is explicitly set.
 
 Function signature:
 
@@ -682,7 +682,7 @@ pesa(200, 'USD').rate('INR', 75).hasConversionRate('INR');
 
 These values can be used for debugging.
 
-_Note: altering the returned valuest won't change the values stored in the `Money` object, these are copies._
+_Note: altering the returned values won't change the values stored in the `Money` object, these are copies._
 
 #### Numeric Representation
 
@@ -702,7 +702,7 @@ pesa(200, 'USD').rate('INR', 75).conversionRate;
 // Map(1) { 'USD-INR' => 75 }
 ```
 
-The returned object is that of the javascript `Map` class. Which has the following key format `${fromCurrency}-${toCurrency}`. The value may be a `string` or `number`.
+The returned object is that of the javascript `Map` class, which has the following key format `${fromCurrency}-${toCurrency}`. The value may be a `string` or `number`.
 
 [Index](#index)
 
@@ -763,14 +763,14 @@ pesa(333, 'INR').to('USD', 0.013).float;
 // 4.329
 ```
 
-If in the above example `precision` were set to 2 it would messup the calculations because 0.013 gets rounded to 0.01 since input `precision` is matched to internal precision.
+If in the above example `precision` were set to 2 it would mess up the calculations because 0.013 gets rounded to 0.01 since input `precision` is matched to internal precision.
 
 ```javascript
 pesa(333, { currency: 'INR', precision: 2 }).to('USD', 0.013).float;
 // 3.33
 ```
 
-So the number you want to adjust is `display` which doesn't mess-up the internal representation.
+So the number you want to adjust is `display` which doesn't mess up the internal representation.
 
 ```javascript
 const money = pesa(333, { currency: 'INR', display: 2 }).to('USD', 0.013);
@@ -913,7 +913,7 @@ if he were to rely on clumsy old JS number:
 
 he would end up loosing almost 30% of his very significant digits. Any one who deals in BTC knows that it is very bad to loose one's digits.
 
-Say he wanted to find out the value of his seeds in USD, which at the time of writing is has the conversion rate of 60951.60 from BTC.
+Say he wanted to find out the value of his seeds in USD, which at the time of writing has the conversion rate of 60951.60 from BTC.
 
 ```javascript
 totalValue.to('USD', 59379.3).round(30);
