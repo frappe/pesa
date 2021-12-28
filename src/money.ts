@@ -300,6 +300,13 @@ export default class Money {
     return splits;
   }
 
+  abs(): Money {
+    if (this.lt(0)) {
+      return this.mul(-1);
+    }
+    return this.copy();
+  }
+
   clip(to?: number): Money {
     to ??= this.display;
     return this.#copySelf(this.#preciseNumber.clip(to), this.#currency);

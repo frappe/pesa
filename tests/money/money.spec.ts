@@ -243,6 +243,18 @@ describe('Money', function () {
       });
     });
 
+    describe('abs', function () {
+      specify('-', function () {
+        assert.strictEqual(pesa(0).abs().float, 0);
+        assert.strictEqual(pesa(-0).abs().float, 0);
+        assert.strictEqual(pesa(0.00001).abs().float, 0.00001);
+        assert.strictEqual(pesa(-0.00001).abs().float, 0.00001);
+        assert.strictEqual(pesa(200).abs().float, 200);
+        assert.strictEqual(pesa(-200).abs().eq(200), true);
+        assert.strictEqual(pesa(-200).abs().eq(-200), false);
+      });
+    });
+
     describe('split', function () {
       const sum = (list: number[]) => list.reduce((a, b) => a + b);
       const money = pesa(200, 'USD');

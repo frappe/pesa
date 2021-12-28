@@ -85,6 +85,7 @@ _(check this talk by [Bartek Szopka](https://www.youtube.com/watch?v=MqHDDtVYJRI
 4. [Other Calculation Functions](#other-calculations-functions)
    - [`percent`](#percent)
    - [`split`](#split)
+   - [`abs`](#abs)
 5. [Display](#display)
    - [`float`](#float)
    - [`round`](#round)
@@ -459,6 +460,26 @@ pesa(100)
   .split(3)
   .map((m) => m.float);
 // [33.333, 33.333, 33.334]
+```
+
+#### `abs`
+
+Returns a `Money` object having the the absolute value of the calling money object.
+
+Function signature:
+
+```typescript
+abs(): Money;
+```
+
+Example:
+
+```javascript
+pesa(-2).abs().eq(2);
+// true
+
+pesa(2).abs().eq(2);
+// true
 ```
 
 ### Display
