@@ -270,11 +270,11 @@ pesa(200)
   .add(22)
   .currency('USD')
   .sub(33)
-  .rate('INR', 0.013)
+  .rate('INR', 75)
   .mul(2, 'INR')
-  .to('INR', 75)
+  .to('INR')
   .round(2);
-// 16585.65
+// '377.99'
 ```
 
 [Index](#index)
