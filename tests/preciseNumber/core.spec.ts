@@ -92,6 +92,11 @@ describe('Core functions', function () {
 
   describe('toDecimalString', function () {
     const testThese = [
+      [0n, 5, '0'],
+      [1n, 1, '0.1'],
+      [-1n, 1, '-0.1'],
+      [100n, 3, '0.1'],
+      [-100n, 3, '-0.1'],
       [22n, 0, '22'],
       [-22n, 0, '-22'],
       [22n, 1, '2.2'],

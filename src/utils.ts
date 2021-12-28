@@ -64,9 +64,9 @@ export function toDecimalString(value: bigint, precision: number): string {
   const sign = isNegative ? '-' : '';
 
   if (d < 0) {
-    return sign + '0.' + '0'.repeat(Math.abs(d)) + stringRep;
+    return sign + stripZeros('0.' + '0'.repeat(Math.abs(d)) + stringRep);
   } else if (d === 0) {
-    return sign + '0.' + stringRep;
+    return sign + stripZeros('0.' + stringRep);
   }
 
   const whole = stringRep.slice(0, d) || '0';
