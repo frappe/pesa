@@ -307,6 +307,10 @@ export default class Money {
     return this.copy();
   }
 
+  neg(): Money {
+    return this.mul(-1);
+  }
+
   clip(to?: number): Money {
     to ??= this.display;
     return this.#copySelf(this.#preciseNumber.clip(to), this.#currency);
@@ -323,6 +327,11 @@ export default class Money {
   eq(value: ArithmeticInput, currency?: string, rate?: number): boolean {
     const { lhs, rhs } = this.#convertInput(value, currency, rate);
     return lhs.eq(rhs);
+  }
+
+  neq(value: ArithmeticInput, currency?: string, rate?: number): boolean {
+    const { lhs, rhs } = this.#convertInput(value, currency, rate);
+    return !lhs.eq(rhs);
   }
 
   gt(value: ArithmeticInput, currency?: string, rate?: number): boolean {

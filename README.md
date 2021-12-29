@@ -50,7 +50,7 @@ _(check this talk by [Bartek Szopka](https://www.youtube.com/watch?v=MqHDDtVYJRI
    1. [Arithmetic Functions](#arithmetic-functions)
    2. [Comparison Functions](#comparison-functions)
    3. [Check Functions](#check-functions)
-   4. [Other Calculations](#other-calculations)
+   4. [Other Calculation Functions](#other-calculations-functions)
    5. [Display](#display)
    6. [Chainable Methods](#chainable-methods)
    7. [Non Chainable Methods](#non-chainable-methods)
@@ -376,6 +376,7 @@ See the **Arguments** table under the **Arithmetic** section.
 | name  | description                                                                              | example            |
 | ----- | ---------------------------------------------------------------------------------------- | ------------------ |
 | `eq`  | checks if the two amounts are the same, i.e. `===`                                       | `pesa(20).eq(20)`  |
+| `neq` | checks if the two amounts are not the same, i.e. `!==`                                   | `pesa(20).neq(19)` |
 | `gt`  | checks if calling object amount is greater than passed amount, i.e. `>`                  | `pesa(20).gt(19)`  |
 | `lt`  | checks if calling object amount is less than passed amount, i.e. `<`                     | `pesa(20).lt(21)`  |
 | `gte` | checks if calling object amount is greater than or equal to the passed amount, i.e. `>=` | `pesa(20).gte(19)` |
@@ -480,6 +481,26 @@ pesa(-2).abs().eq(2);
 
 pesa(2).abs().eq(2);
 // true
+```
+
+#### `neg`
+
+Returns a `Money` object having the the negated value of the calling money object.
+
+Function signature:
+
+```typescript
+neg(): Money;
+```
+
+Example:
+
+```javascript
+pesa(-2).neg().round();
+// '2.000'
+
+pesa(2).neg().round();
+// '-2.000'
 ```
 
 ### Display
