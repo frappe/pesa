@@ -62,7 +62,8 @@ _(check this talk by [Bartek Szopka](https://www.youtube.com/watch?v=MqHDDtVYJRI
    4. [Precision vs Display](#precision-vs-display)
    5. [Why High Precision](#why-high-precision)
    6. [Implicit Conversions](#implicit-conversions)
-   7. [Use Cases](#use-cases)
+   7. [Rounding](#rounding)
+   8. [Use Cases](#use-cases)
 5. [Alternatives](#alternatives)
 
 </details>
@@ -891,6 +892,71 @@ clipped.internal;
 clipped.round();
 // '100.000'
 ```
+
+### Rounding
+
+Rounding at mid-points is confusing af.
+
+```javascript
+2.5; // Mid-point
+
+2.49999; // Not mid-point
+2.50001; // Not mid-point
+```
+
+The **traditional** rounding method always _rounds up_ from the mid point.
+
+```javascript
+pesa(2.5, { bankersRounding: false }).round(0);
+// '3'
+```
+
+This is uneven because of right side bias on the number line, so to mitigate this bias we have **bankers** rounding which _rounds to the closest even number_. `pesa` uses bankers rounding by default:
+
+```javascript
+pesa(0.5).round(0);
+// '0'
+
+pesa(1.5).round(0);
+// '2'
+
+pesa(2.5).round(0);
+// '2'
+
+pesa(3.5).round(0);
+// '4'
+```
+
+Things get even more confusing when considering negative numbers. But if you remember that **traditional** rounding rounds _up_, i.e. towards positive infinity or to the right of the number line, not away from zero:
+
+```javascript
+pesa(-2.5, { bankersRounding: false }).round(0);
+// '-2'
+```
+
+and **bankers** rounding rounds to the _closest even number_ which is always at a distance of 0.5 (if rounding to 0):
+
+```javascript
+pesa(-2.5).round(0);
+// '-2'
+
+pesa(-3.5).round(0);
+// '-4'
+```
+
+you will be less confused.
+
+Finally, remember that bankers rounding kicks in _only at the mid point_, this depends on the precision:
+
+```javascript
+pesa(2.51, { precision: 2 }).round(0);
+// '3'
+
+pesa(2.51, { precision: 1 }).round(0);
+// '2'
+```
+
+due to precision loss, a non mid-point can become a mid-point and bankers algo will be used for rounding.
 
 ### Use Cases
 
