@@ -1,4 +1,4 @@
-import { DEF_PREC, MAX_PREC, MIN_PREC } from './consts';
+import { DEF_PREC, MAX_PREC, MIN_PREC, USE_BNKR } from './consts';
 import { matchPrecision, scaler, toDecimalString } from './utils';
 
 const enum Operator {
@@ -21,6 +21,7 @@ type Input = PreciseNumber | bigint | number | string;
 export default class PreciseNumber {
   #precision: number;
   #value: bigint;
+  bankersRounding: boolean;
 
   /* ---------------------------------
    * Private methods
@@ -129,11 +130,16 @@ export default class PreciseNumber {
    * Constructor and others
    * ---------------------------------*/
 
-  constructor(value: Input = 0, precision: number = DEF_PREC) {
+  constructor(
+    value: Input = 0,
+    precision: number = DEF_PREC,
+    bankersRounding: boolean = USE_BNKR
+  ) {
     precision = this.#validateAndGetPrecision(precision);
 
     this.#value = 0n;
     this.#precision = precision;
+    this.bankersRounding = bankersRounding;
     this.value = value;
   }
 
@@ -142,7 +148,8 @@ export default class PreciseNumber {
     this.#value = value;
   }
 
-  round(to: number): string {
+  round(to: number, bankersRounding?: boolean): string {
+    bankersRounding ??= this.bankersRounding;
     this.#throwIfInvalidInput(to);
     to = to >= 0 ? to : 0;
 
@@ -156,7 +163,19 @@ export default class PreciseNumber {
     const whole = stringRep.slice(0, dpoint) || '0';
     const fraction = stringRep.slice(dpoint);
     const trailingZeros = '0'.repeat(Math.max(0, diff));
-    const roundingDigit = (parseInt(fraction[to]) || 0) > 4 ? 1n : 0n;
+    const ultimateDigit = parseInt(fraction[to]);
+    const isMid =
+      ultimateDigit === 5 &&
+      [...fraction.slice(to + 1)].every((d) => d === '0');
+    let roundingDigit =
+      (ultimateDigit || 0) <= 4 ? 0n : isNeg && isMid ? 0n : 1n;
+
+    if (bankersRounding && isMid && trailingZeros.length === 0) {
+      const penultimateDigit =
+        parseInt(to - 1 >= 0 ? fraction[to - 1] : whole[dpoint - 1]) || 0;
+      roundingDigit = penultimateDigit % 2 === 0 ? 0n : 1n;
+    }
+
     let lowPrescisionRep = (
       BigInt(whole + fraction.slice(0, to) + trailingZeros) + roundingDigit
     ).toString();
@@ -168,7 +187,12 @@ export default class PreciseNumber {
     const newWhole = lowPrescisionRep.slice(0, newDpoint) || '0';
     const newFractional = lowPrescisionRep.slice(newDpoint);
     const tail = '.' + newFractional + '0'.repeat(to - newFractional.length);
-    return (isNeg ? '-' : '') + newWhole + (tail !== '.' ? tail : '');
+    const noSign = newWhole + (tail !== '.' ? tail : '');
+    return (
+      (!isNeg || [...noSign].filter((d) => d !== '.').every((d) => d === '0')
+        ? ''
+        : '-') + noSign
+    );
   }
 
   clip(to: number) {

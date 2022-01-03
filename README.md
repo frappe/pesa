@@ -159,10 +159,11 @@ const money = pesa(200);
 
 ```typescript
 interface Options {
-  currency?: string; // Three letter alphabetical code in uppercase ('INR').
-  precision?: number; // Integer between 0 and 20.
-  display?: number; // Number of digits .round defaults to.
-  rate?: RateSetting | RateSetting[]; // Conversion rates
+  bankersRounding?: boolean; // Default true, use bankers rounding instead of traditional rounding.
+  currency?: string; // Default '', Three letter alphabetical code in uppercase ('INR').
+  precision?: number; // Default 6, Integer between 0 and 20.
+  display?: number; // Default 3, Number of digits .round defaults to.
+  rate?: RateSetting | RateSetting[]; // Default [], Conversion rates
 }
 
 interface RateSetting {

@@ -106,8 +106,19 @@ describe('PreciseNumber, Maker', function () {
 });
 
 describe('PreciseNumber, Other functions', function () {
-  context('Round', function () {
+  context('Round, traditional', function () {
     const testThese: [number | string, number, string, number][] = [
+      [0.5, 6, '1', 0],
+      [1.5, 6, '2', 0],
+      [2.5, 6, '3', 0],
+      [3.5, 6, '4', 0],
+      [-0.5, 6, '0', 0],
+      [-1.5, 6, '-1', 0],
+      [-2.5, 6, '-2', 0],
+      [-3.5, 6, '-3', 0],
+      [-1.51, 6, '-2', 0],
+      [-1.5000001, 6, '-1', 0],
+      [-1.51, 6, '-2', 0],
       [1234.5678, 4, '1235', -1],
       [1234.5678, 4, '1235', 0],
       [1234.5678, 4, '1234.6', 1],
@@ -130,7 +141,44 @@ describe('PreciseNumber, Other functions', function () {
 
     for (let test of testThese) {
       const [input, precision, expectedOutput, to] = test;
-      const output = p(input, precision).round(to);
+      const output = p(input, precision).round(to, false);
+      specify(`input: ${input}`, function () {
+        assert.strictEqual(output, expectedOutput);
+      });
+    }
+  });
+
+  context('Round, bankers', function () {
+    const testThese: [number | string, number, string, number][] = [
+      [0.5, 6, '0', 0],
+      [1.5, 6, '2', 0],
+      [2.5, 6, '2', 0],
+      [3.5, 6, '4', 0],
+      [-0.5, 6, '0', 0],
+      [-1.5, 6, '-2', 0],
+      [-2.5, 6, '-2', 0],
+      [-3.5, 6, '-4', 0],
+      [0.15, 6, '0.2', 1],
+      [1.15, 6, '1.2', 1],
+      [2.15, 6, '2.2', 1],
+      [3.15, 6, '3.2', 1],
+      [-0.15, 6, '-0.2', 1],
+      [-1.15, 6, '-1.2', 1],
+      [-2.15, 6, '-2.2', 1],
+      [-3.15, 6, '-3.2', 1],
+      [0.115, 6, '0.12', 2],
+      [1.115, 6, '1.12', 2],
+      [2.115, 6, '2.12', 2],
+      [3.115, 6, '3.12', 2],
+      [0.115, 6, '0.12', 2],
+      [1.125, 6, '1.12', 2],
+      [2.135, 6, '2.14', 2],
+      [3.145, 6, '3.14', 2],
+    ];
+
+    for (let test of testThese) {
+      const [input, precision, expectedOutput, to] = test;
+      const output = p(input, precision).round(to, true);
       specify(`input: ${input}`, function () {
         assert.strictEqual(output, expectedOutput);
       });

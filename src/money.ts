@@ -1,4 +1,4 @@
-import { DEF_DISP, DEF_PREC } from './consts';
+import { DEF_DISP, DEF_PREC, USE_BNKR } from './consts';
 import PreciseNumber from './preciseNumber';
 import {
   getConversionRateKey,
@@ -10,6 +10,7 @@ type Input = PreciseNumber | bigint | number | string;
 type ArithmeticInput = Money | number | string;
 type Rate = string | number;
 type ConversionRateMap = Map<string, Rate>;
+
 interface RateSetting {
   from: string;
   to: string;
@@ -17,6 +18,7 @@ interface RateSetting {
 }
 
 export interface Options {
+  bankersRounding?: boolean;
   precision?: number;
   currency?: string;
   display?: number;
@@ -32,7 +34,8 @@ export default class Money {
   constructor(amount: Input, options: Options = {}) {
     this.#preciseNumber = new PreciseNumber(
       amount,
-      options.precision ?? DEF_PREC
+      options.precision ?? DEF_PREC,
+      options.bankersRounding ?? USE_BNKR
     );
 
     this.#currency = '';
