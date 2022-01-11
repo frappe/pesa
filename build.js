@@ -13,6 +13,7 @@ esbuild.buildSync({
   format: 'cjs',
   platform: 'node',
   outfile: 'dist/pesa.cjs',
+  sourcemap: true,
 });
 
 // Module build
@@ -22,4 +23,5 @@ esbuild.buildSync({
   format: 'esm',
   platform: 'browser',
   outfile: 'dist/pesa.mjs',
+  sourcemap: true,
 });
