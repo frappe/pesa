@@ -13,7 +13,7 @@ jobs:
       - name: Instal dev-dependencies
         run: yarn --frozen-lockfile
       - name: Checking typing and formatting
-        run: yarn run check
+        run: yarn run checkformat
       - name: Running build
         run: yarn run build
       - name: Running tests
