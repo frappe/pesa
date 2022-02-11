@@ -1,6 +1,6 @@
 {
   "name": "pesa",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "A JS money lib whose precision goes upto 11 (and beyond)",
   "main": "dist/pesa.cjs",
   "module": "dist/pesa.mjs",
@@ -12,6 +12,7 @@
     "test": "mocha --reporter nyan --require ts-node/register tests/**/*.spec.ts",
     "testci": "mocha --reporter spec --require ts-node/register tests/**/*.spec.ts",
     "build": "tsc --emitDeclarationOnly && rm -rf dist/types/tests && node build.js",
+    "pub": "rm -rf dist && yarn build && yarn publish",
     "format": "prettier --write ."
   },
   "repository": {
