@@ -10,6 +10,7 @@ type Input = PreciseNumber | bigint | number | string;
 type ArithmeticInput = Money | number | string;
 type Rate = string | number;
 type ConversionRateMap = Map<string, Rate>;
+type Wrapper = (m: Money) => Money;
 
 interface RateSetting {
   from: string;
@@ -23,11 +24,13 @@ export interface Options {
   currency?: string;
   display?: number;
   rates?: RateSetting | RateSetting[];
+  wrapper?: Wrapper;
 }
 
 export default class Money {
   display: number;
   #currency: string;
+  #wrapper: Wrapper;
   #preciseNumber: PreciseNumber;
   #conversionRates: ConversionRateMap;
 
@@ -40,6 +43,7 @@ export default class Money {
 
     this.#currency = '';
     this.#conversionRates = new Map();
+    this.#wrapper = options.wrapper ?? ((m: Money) => m);
     this.display = options.display ?? DEF_DISP;
 
     const { currency, rates } = options;
@@ -49,6 +53,8 @@ export default class Money {
     if (rates) {
       this.rate(rates);
     }
+
+    return this.#wrapper(this);
   }
 
   /* ---------------------------------
@@ -119,6 +125,7 @@ export default class Money {
       currency: currency || this.#currency,
       precision: this.#preciseNumber.precision,
       display: this.display,
+      wrapper: this.#wrapper,
     };
 
     const result = new Money(value, options);

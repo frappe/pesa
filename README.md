@@ -160,11 +160,12 @@ const money = pesa(200);
 
 ```typescript
 interface Options {
-  bankersRounding?: boolean; // Default true, use bankers rounding instead of traditional rounding.
-  currency?: string; // Default '', Three letter alphabetical code in uppercase ('INR').
-  precision?: number; // Default 6, Integer between 0 and 20.
-  display?: number; // Default 3, Number of digits .round defaults to.
-  rate?: RateSetting | RateSetting[]; // Default [], Conversion rates
+  bankersRounding?: boolean; // Default: true, use bankers rounding instead of traditional rounding.
+  currency?: string; // Default: '', Three letter alphabetical code in uppercase ('INR').
+  precision?: number; // Default: 6, Integer between 0 and 20.
+  display?: number; // Default: 3, Number of digits .round defaults to.
+  wrapper?: Wrapper; // Default: (m) => m, Used to augment all returned money objects.
+  rate?: RateSetting | RateSetting[]; // Default: [], Conversion rates
 }
 
 interface RateSetting {
@@ -172,6 +173,8 @@ interface RateSetting {
   to: string;
   rate: string | number;
 }
+
+type Wrapper = (m: Money) => Money;
 ```
 
 **Value** can be a `string`, `number` or a `bigint`. If value is not passed the value is set as 0.
@@ -192,6 +195,13 @@ pesa('235').internal;
 pesa(235n).internal;
 // { bigint: 235n, precision: 6 }
 ```
+
+**Wrapper** is a function that can add additional properties to the returned object.
+One use case is Vue3 where everything is deeply converted into a `Proxy`, this is incompatible with `pesa` because of it's private variables and immutability.
+
+So to remedy this you can pass [`markRaw`](https://vuejs.org/api/reactivity-advanced.html#markraw) as the wrapper function.
+
+This will prevent the _proxification_ of `pesa` objects. Which in the case of `pesa` shouldn't be required anyway because the underlying value is never changed.
 
 ### Currency and Conversions
 

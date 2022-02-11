@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import 'mocha';
-import { pesa } from '../../index';
+import { getMoneyMaker, pesa } from '../../index';
+import Money from '../../src/money';
 
 describe('Money', function () {
   describe('currency', function () {
@@ -288,6 +289,46 @@ describe('Money', function () {
           });
         });
       });
+    });
+  });
+
+  describe('constructor', function () {
+    specify('wrapper', function () {
+      const wrapper = (m: Money) => {
+        // @ts-ignore
+        m.__v_skip = true;
+        return m;
+      };
+
+      const money = pesa(200, { wrapper });
+      assert.strictEqual(money.float, 200);
+      assert.strictEqual(money.hasOwnProperty('__v_skip'), true);
+
+      let otherMoney = money.add(300);
+      assert.strictEqual(otherMoney.float, 500);
+      assert.strictEqual(otherMoney.hasOwnProperty('__v_skip'), true);
+    });
+  });
+});
+
+describe('getMoneyMaker', function () {
+  describe('constructor', function () {
+    specify('wrapper', function () {
+      const wrapper = (m: Money) => {
+        // @ts-ignore
+        m.__v_skip = true;
+        return m;
+      };
+
+      const moneyMaker = getMoneyMaker({ wrapper });
+
+      const money = moneyMaker(200);
+      assert.strictEqual(money.float, 200);
+      assert.strictEqual(money.hasOwnProperty('__v_skip'), true);
+
+      let otherMoney = money.add(300);
+      assert.strictEqual(otherMoney.float, 500);
+      assert.strictEqual(otherMoney.hasOwnProperty('__v_skip'), true);
     });
   });
 });
