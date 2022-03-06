@@ -2,15 +2,15 @@ import { DEF_PREC } from './src/consts';
 import Money, { Options } from './src/money';
 import PreciseNumber from './src/preciseNumber';
 
-type Input = bigint | number | string;
-type Currency = string;
-type Config = Options | Currency;
+export type Input = bigint | number | string;
+export type Currency = string;
+export type Config = Options | Currency;
 
-type PreciseNumberMaker = (
+export type PreciseNumberMaker = (
   value: Input,
   innerPrecision?: number
 ) => PreciseNumber;
-type MoneyMaker = (value: Input, innerOptions?: Config) => Money;
+export type MoneyMaker = (value: Input, innerOptions?: Config) => Money;
 
 export function p(value: Input = 0, precision: number = 6): PreciseNumber {
   return new PreciseNumber(value, precision);
