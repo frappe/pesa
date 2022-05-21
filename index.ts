@@ -37,3 +37,5 @@ export function getMoneyMaker(options: Config = {}): MoneyMaker {
     return pesa(value, innerOptions ?? options);
   };
 }
+
+export { Money, PreciseNumber };

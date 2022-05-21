@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig",
+  "exclude": ["tests/**/*"],
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist"
+  }
+}
