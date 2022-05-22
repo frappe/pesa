@@ -83,10 +83,7 @@ export default class Money {
   }
 
   get preciseNumber(): PreciseNumber {
-    return new PreciseNumber(
-      this.#preciseNumber,
-      this.#preciseNumber.precision
-    );
+    return this.#preciseNumber;
   }
 
   get internal() {
@@ -109,7 +106,7 @@ export default class Money {
    * ---------------------------------*/
 
   _setConversionRates(rates: ConversionRateMap) {
-    if (Array(...this.#conversionRates.keys()).length === 0) {
+    if (this.#conversionRates.size === 0) {
       this.#conversionRates = new Map(rates);
     }
   }

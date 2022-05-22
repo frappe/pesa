@@ -21,7 +21,7 @@ type Input = PreciseNumber | bigint | number | string;
 export default class PreciseNumber {
   #precision: number;
   #value: bigint;
-  bankersRounding: boolean;
+  #bankersRounding: boolean;
 
   /* ---------------------------------
    * Private methods
@@ -84,7 +84,7 @@ export default class PreciseNumber {
       }
     });
     // this.#value = finalAmount;
-    const result = new PreciseNumber(0, this.#precision);
+    const result = new PreciseNumber(0n, this.#precision);
     result._setInnerValue(finalAmount);
     return result;
   }
@@ -131,7 +131,7 @@ export default class PreciseNumber {
    * ---------------------------------*/
 
   constructor(
-    value: Input = 0,
+    value: Input = 0n,
     precision: number = DEF_PREC,
     bankersRounding: boolean = USE_BNKR
   ) {
@@ -139,7 +139,7 @@ export default class PreciseNumber {
 
     this.#value = 0n;
     this.#precision = precision;
-    this.bankersRounding = bankersRounding;
+    this.#bankersRounding = bankersRounding;
     this.value = value;
   }
 
@@ -149,7 +149,7 @@ export default class PreciseNumber {
   }
 
   round(to: number, bankersRounding?: boolean): string {
-    bankersRounding ??= this.bankersRounding;
+    bankersRounding ??= this.#bankersRounding;
     this.#throwIfInvalidInput(to);
     to = to >= 0 ? to : 0;
 
@@ -201,7 +201,7 @@ export default class PreciseNumber {
   }
 
   copy() {
-    const pn = new PreciseNumber(0, this.#precision);
+    const pn = new PreciseNumber(0n, this.#precision);
     pn._setInnerValue(this.#value);
     return pn;
   }
