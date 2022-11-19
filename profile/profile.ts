@@ -1,7 +1,13 @@
 import { randomInt } from 'crypto';
-import { p, pesa } from '../index';
+import { Input, p, pesa } from '../index';
+import _PreciseNumber from '../src/_preciseNumber';
 import { Timer } from './timer';
+
 const MAX = 100_000;
+
+function _p(value: Input = 0, precision: number = 6): _PreciseNumber {
+  return new _PreciseNumber(value, precision);
+}
 
 function randomBigInt(max: number): bigint {
   return BigInt(randomInt(max));
@@ -39,11 +45,19 @@ function doBigint() {
   );
 }
 
-const toProfile = {
+export const pf = {
   doPNumber,
   doPesa,
   doNumber,
   doBigint,
+};
+
+const toProfile = {
+  initPn: () => p(randomInt(MAX)),
+  init_Pn: () => _p(randomInt(MAX)),
+  initPesa: () => pesa(randomInt(MAX)),
+  addPn: () => p(randomInt(MAX)).add(randomInt(MAX)),
+  addPesa: () => pesa(randomInt(MAX)).add(randomInt(MAX)),
   randomInt: () => randomInt(MAX),
   randomBigInt: () => randomBigInt(MAX),
 };
