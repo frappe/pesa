@@ -19,115 +19,13 @@ const enum Comparator {
 type Input = PreciseNumber | bigint | number | string;
 
 export default class PreciseNumber {
+  #neutralizer: bigint;
   #precision: number;
   #value: bigint;
   #bankersRounding: boolean;
 
   /* ---------------------------------
-   * Private methods
-   * ---------------------------------*/
-
-  #throwIfInvalidInput(...values: (Input | bigint)[]) {
-    values.forEach((value) => {
-      if (value === 0 || value === 0n) {
-        return;
-      }
-
-      if (
-        Number.isNaN(value) ||
-        value === Infinity ||
-        value === -Infinity ||
-        !value
-      ) {
-        throw Error(`invalid value ${value} found`);
-      }
-    });
-  }
-
-  #scaleAndConvert(value: Input): bigint {
-    if (value instanceof PreciseNumber) {
-      return matchPrecision(value.integer, value.precision, this.precision);
-    }
-
-    if (typeof value === 'bigint') {
-      return value;
-    }
-
-    return scaler(value, this.#precision);
-  }
-
-  #neutralizedMul(product: bigint, neutralizer: bigint) {
-    const final = product / neutralizer;
-    const temp = product.toString();
-    const roundingNum =
-      parseInt(temp.charAt(temp.length - this.#precision) || '0') > 4 ? 1n : 0n;
-
-    return final + roundingNum;
-  }
-
-  #executeOperation(operator: Operator, ...values: Input[]): PreciseNumber {
-    this.#throwIfInvalidInput(...values);
-    const neutralizer: bigint = 10n ** BigInt(this.#precision);
-    const prAmounts: bigint[] = values.map(this.#scaleAndConvert, this);
-    const finalAmount: bigint = prAmounts.reduce((a, b) => {
-      switch (operator) {
-        case Operator.Add:
-          return a + b;
-        case Operator.Sub:
-          return a - b;
-        case Operator.Div:
-          return (a * neutralizer) / b;
-        case Operator.Mul:
-          return this.#neutralizedMul(a * b, neutralizer);
-        default:
-          return 0n;
-      }
-    });
-    // this.#value = finalAmount;
-    const result = new PreciseNumber(0n, this.#precision);
-    result._setInnerValue(finalAmount);
-    return result;
-  }
-
-  #executeComparison(
-    comparator: Comparator,
-    valueA: Input,
-    valueB: Input
-  ): boolean {
-    this.#throwIfInvalidInput(valueA, valueB);
-    const prAmountA = this.#scaleAndConvert(valueA);
-    const prAmountB = this.#scaleAndConvert(valueB);
-    switch (comparator) {
-      case '===':
-        return prAmountA === prAmountB;
-      case '>':
-        return prAmountA > prAmountB;
-      case '<':
-        return prAmountA < prAmountB;
-      case '>=':
-        return prAmountA >= prAmountB;
-      case '<=':
-        return prAmountA <= prAmountB;
-      default:
-        return false;
-    }
-  }
-
-  #validateAndGetPrecision(precision: number) {
-    precision = Math.round(precision);
-    if (precision > MAX_PREC || precision < MIN_PREC) {
-      throw Error(`precision should be between ${MIN_PREC} and ${MAX_PREC}`);
-    }
-
-    return precision;
-  }
-
-  static #splitInput(values: Input[]): [Input, Input[]] {
-    return [values[0], values.slice(1)];
-  }
-
-  /* ---------------------------------
-   * Constructor and others
+   * Constructor
    * ---------------------------------*/
 
   constructor(
@@ -135,22 +33,19 @@ export default class PreciseNumber {
     precision: number = DEF_PREC,
     bankersRounding: boolean = USE_BNKR
   ) {
-    precision = this.#validateAndGetPrecision(precision);
-
-    this.#value = 0n;
-    this.#precision = precision;
+    this.#precision = validateAndGetPrecision(precision);
     this.#bankersRounding = bankersRounding;
-    this.value = value;
+    this.#neutralizer = 10n ** BigInt(this.#precision);
+    this.#value = scaleAndConvert(value, this.precision);
   }
 
-  _setInnerValue(value: bigint) {
-    this.#throwIfInvalidInput(value);
-    this.#value = value;
-  }
+  /* ---------------------------------
+   * Utility methods
+   * ---------------------------------*/
 
   round(to: number, bankersRounding?: boolean): string {
     bankersRounding ??= this.#bankersRounding;
-    this.#throwIfInvalidInput(to);
+    throwIfInvalidInput(to);
     to = to >= 0 ? to : 0;
 
     const diff = to - this.#precision;
@@ -163,7 +58,7 @@ export default class PreciseNumber {
     const whole = stringRep.slice(0, dpoint) || '0';
     const fraction = stringRep.slice(dpoint);
     const trailingZeros = '0'.repeat(Math.max(0, diff));
-    const ultimateDigit = parseInt(fraction[to]);
+    const ultimateDigit = Number(fraction[to]);
     const isMid =
       ultimateDigit === 5 &&
       [...fraction.slice(to + 1)].every((d) => d === '0');
@@ -172,7 +67,7 @@ export default class PreciseNumber {
 
     if (bankersRounding && isMid && trailingZeros.length === 0) {
       const penultimateDigit =
-        parseInt(to - 1 >= 0 ? fraction[to - 1] : whole[dpoint - 1]) || 0;
+        Number(to - 1 >= 0 ? fraction[to - 1] : whole[dpoint - 1]) || 0;
       roundingDigit = penultimateDigit % 2 === 0 ? 0n : 1n;
     }
 
@@ -196,14 +91,12 @@ export default class PreciseNumber {
   }
 
   clip(to: number) {
-    this.#throwIfInvalidInput(to);
+    throwIfInvalidInput(to);
     return new PreciseNumber(this.round(to), this.#precision);
   }
 
   copy() {
-    const pn = new PreciseNumber(0n, this.#precision);
-    pn._setInnerValue(this.#value);
-    return pn;
+    return new PreciseNumber(this.#value, this.#precision);
   }
 
   /* ---------------------------------
@@ -212,11 +105,6 @@ export default class PreciseNumber {
 
   get value(): number {
     return Number(this.#value) / Math.pow(10, this.#precision);
-  }
-
-  set value(value: Input) {
-    this.#throwIfInvalidInput(value);
-    this.#value = this.#scaleAndConvert(value);
   }
 
   get float(): number {
@@ -232,25 +120,11 @@ export default class PreciseNumber {
   }
 
   set precision(precision: number) {
-    precision = this.#validateAndGetPrecision(precision);
+    precision = validateAndGetPrecision(precision);
+
     this.#value = matchPrecision(this.#value, this.precision, this.#precision);
-    this.#precision = this.#precision;
-  }
-
-  /* ---------------------------------
-   * Getters and Setters (Convenience)
-   * ---------------------------------*/
-
-  get v() {
-    return this.value;
-  }
-
-  set v(value: Input) {
-    this.value = value;
-  }
-
-  get i() {
-    return this.integer;
+    this.#precision = precision;
+    this.#neutralizer = getNeutralizer(precision);
   }
 
   /* ---------------------------------
@@ -258,43 +132,39 @@ export default class PreciseNumber {
    * ---------------------------------*/
 
   add(...values: Input[]): PreciseNumber {
-    return this.#executeOperation(Operator.Add, ...[this, ...values]);
+    return executeOperation(
+      Operator.Add,
+      [this, values].flat(),
+      this.precision,
+      this.#neutralizer
+    );
   }
 
   sub(...values: Input[]): PreciseNumber {
-    return this.#executeOperation(Operator.Sub, ...[this, ...values]);
+    return executeOperation(
+      Operator.Sub,
+      [this, values].flat(),
+      this.precision,
+      this.#neutralizer
+    );
   }
 
   mul(...values: Input[]): PreciseNumber {
-    return this.#executeOperation(Operator.Mul, ...[this, ...values]);
+    return executeOperation(
+      Operator.Mul,
+      [this, values].flat(),
+      this.precision,
+      this.#neutralizer
+    );
   }
 
   div(...values: Input[]): PreciseNumber {
-    return this.#executeOperation(Operator.Div, ...[this, ...values]);
-  }
-
-  /* ---------------------------------
-   * Static Operator Methods
-   * ---------------------------------*/
-
-  static add(...values: Input[]): PreciseNumber {
-    const [first, remaining] = this.#splitInput(values);
-    return new this(first).add(...remaining);
-  }
-
-  static sub(...values: Input[]): PreciseNumber {
-    const [first, remaining] = this.#splitInput(values);
-    return new this(first).sub(...remaining);
-  }
-
-  static mul(...values: Input[]): PreciseNumber {
-    const [first, remaining] = this.#splitInput(values);
-    return new this(first).mul(...remaining);
-  }
-
-  static div(...values: Input[]): PreciseNumber {
-    const [first, remaining] = this.#splitInput(values);
-    return new this(first).div(...remaining);
+    return executeOperation(
+      Operator.Div,
+      [this, values].flat(),
+      this.precision,
+      this.#neutralizer
+    );
   }
 
   /* ---------------------------------
@@ -302,23 +172,61 @@ export default class PreciseNumber {
    * ---------------------------------*/
 
   eq(value: Input): boolean {
-    return this.#executeComparison(Comparator.Eq, this, value);
+    return executeComparison(Comparator.Eq, this, value, this.precision);
   }
 
   gt(value: Input): boolean {
-    return this.#executeComparison(Comparator.Gt, this, value);
+    return executeComparison(Comparator.Gt, this, value, this.precision);
   }
 
   lt(value: Input): boolean {
-    return this.#executeComparison(Comparator.Lt, this, value);
+    return executeComparison(Comparator.Lt, this, value, this.precision);
   }
 
   gte(value: Input): boolean {
-    return this.#executeComparison(Comparator.Gte, this, value);
+    return executeComparison(Comparator.Gte, this, value, this.precision);
   }
 
   lte(value: Input): boolean {
-    return this.#executeComparison(Comparator.Lte, this, value);
+    return executeComparison(Comparator.Lte, this, value, this.precision);
+  }
+
+  /* ---------------------------------
+   * Static Configuration
+   * ---------------------------------*/
+
+  static #prec: number = DEF_PREC;
+
+  static #neut: bigint = getNeutralizer(DEF_PREC);
+
+  static get prec() {
+    return this.#prec;
+  }
+
+  static set prec(value: number) {
+    value = validateAndGetPrecision(value);
+    this.#prec = value;
+    this.#neut = getNeutralizer(value);
+  }
+
+  /* ---------------------------------
+   * Static Operator Methods
+   * ---------------------------------*/
+
+  static add(...values: Input[]): PreciseNumber {
+    return executeOperation(Operator.Add, values, this.prec, this.#neut);
+  }
+
+  static sub(...values: Input[]): PreciseNumber {
+    return executeOperation(Operator.Sub, values, this.prec, this.#neut);
+  }
+
+  static mul(...values: Input[]): PreciseNumber {
+    return executeOperation(Operator.Sub, values, this.prec, this.#neut);
+  }
+
+  static div(...values: Input[]): PreciseNumber {
+    return executeOperation(Operator.Sub, values, this.prec, this.#neut);
   }
 
   /* ---------------------------------
@@ -326,23 +234,23 @@ export default class PreciseNumber {
    * ---------------------------------*/
 
   static eq(valueA: Input, valueB: Input): boolean {
-    return new this(valueA).eq(valueB);
+    return executeComparison(Comparator.Eq, valueA, valueB, this.prec);
   }
 
   static gt(valueA: Input, valueB: Input): boolean {
-    return new this(valueA).gt(valueB);
+    return executeComparison(Comparator.Gt, valueA, valueB, this.prec);
   }
 
   static lt(valueA: Input, valueB: Input): boolean {
-    return new this(valueA).lt(valueB);
+    return executeComparison(Comparator.Lt, valueA, valueB, this.prec);
   }
 
   static gte(valueA: Input, valueB: Input): boolean {
-    return new this(valueA).gte(valueB);
+    return executeComparison(Comparator.Gte, valueA, valueB, this.prec);
   }
 
   static lte(valueA: Input, valueB: Input): boolean {
-    return new this(valueA).lte(valueB);
+    return executeComparison(Comparator.Lte, valueA, valueB, this.prec);
   }
 
   /* ---------------------------------
@@ -375,5 +283,117 @@ export default class PreciseNumber {
 
   valueOf(): bigint {
     return this.#value;
+  }
+}
+
+function validateAndGetPrecision(precision: number) {
+  precision = Math.round(precision);
+  if (precision > MAX_PREC || precision < MIN_PREC) {
+    throw Error(`precision should be between ${MIN_PREC} and ${MAX_PREC}`);
+  }
+
+  return precision;
+}
+
+function throwIfInvalidInput(...values: (Input | bigint)[]) {
+  values.forEach((value) => {
+    if (value === 0 || value === 0n) {
+      return;
+    }
+
+    if (
+      Number.isNaN(value) ||
+      value === Infinity ||
+      value === -Infinity ||
+      !value
+    ) {
+      throw Error(`invalid value ${value} found`);
+    }
+  });
+}
+
+function scaleAndConvert(value: Input, precision: number): bigint {
+  if (typeof value === 'bigint') {
+    return value;
+  }
+
+  if (value instanceof PreciseNumber) {
+    return matchPrecision(value.integer, value.precision, precision);
+  }
+
+  return scaler(value, precision);
+}
+
+function neutralizedMul(
+  product: bigint,
+  precision: number,
+  neutralizer: bigint
+) {
+  const final = product / neutralizer;
+  const temp = product.toString();
+  const roundingNum =
+    Number(temp.charAt(temp.length - precision) || '0') > 4 ? 1n : 0n;
+
+  return final + roundingNum;
+}
+
+function getNeutralizer(precision: number) {
+  return 10n ** BigInt(precision);
+}
+
+function executeOperation(
+  operator: Operator,
+  values: Input[],
+  precision: number,
+  neutralizer: bigint
+): PreciseNumber {
+  throwIfInvalidInput(...values);
+
+  const prAmounts: bigint[] = values.map((val) =>
+    scaleAndConvert(val, precision)
+  );
+
+  const finalAmount: bigint = prAmounts.reduce((a, b) => {
+    switch (operator) {
+      case Operator.Add:
+        return a + b;
+      case Operator.Sub:
+        return a - b;
+      case Operator.Div:
+        return (a * (neutralizer ?? getNeutralizer(precision))) / b;
+      case Operator.Mul:
+        return neutralizedMul(a * b, precision, neutralizer);
+      default:
+        return 0n;
+    }
+  });
+
+  return new PreciseNumber(finalAmount, precision);
+}
+
+function executeComparison(
+  comparator: Comparator,
+  valueA: Input,
+  valueB: Input,
+  precision: number
+): boolean {
+  throwIfInvalidInput(valueA, valueB);
+
+  const prAmountA = scaleAndConvert(valueA, precision);
+  const prAmountB = scaleAndConvert(valueB, precision);
+
+  switch (comparator) {
+    case '===':
+      return prAmountA === prAmountB;
+    case '>':
+      return prAmountA > prAmountB;
+    case '<':
+      return prAmountA < prAmountB;
+    case '>=':
+      return prAmountA >= prAmountB;
+    case '<=':
+      return prAmountA <= prAmountB;
+    default:
+      return false;
   }
 }

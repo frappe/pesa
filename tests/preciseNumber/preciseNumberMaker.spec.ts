@@ -76,8 +76,8 @@ describe('PreciseNumber, Maker', function () {
 
       specify(`input: ${input}`, function () {
         const pn = p(input, precision);
-        assert.strictEqual(pn.v, value);
-        assert.strictEqual(pn.i, integer);
+        assert.strictEqual(pn.value, value);
+        assert.strictEqual(pn.integer, integer);
       });
     }
   });

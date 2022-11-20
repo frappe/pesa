@@ -65,10 +65,10 @@ describe('PreciseNumber, Comparators', function () {
       const b = a.add(0.2);
 
       specify('one.a', function () {
-        assert.strictEqual(a.i, 100000n);
-        assert.strictEqual(a.v, 0.1);
-        assert.strictEqual(b.i, 300000n);
-        assert.strictEqual(b.v, 0.3);
+        assert.strictEqual(a.integer, 100000n);
+        assert.strictEqual(a.value, 0.1);
+        assert.strictEqual(b.integer, 300000n);
+        assert.strictEqual(b.value, 0.3);
       });
 
       specify('one.b', function () {
@@ -93,10 +93,10 @@ describe('PreciseNumber, Comparators', function () {
       const b = a.add(0.2);
 
       specify('one.a', function () {
-        assert.strictEqual(a.i, 5000n);
-        assert.strictEqual(a.v, 0.005);
-        assert.strictEqual(b.i, 205000n);
-        assert.strictEqual(b.v, 0.205);
+        assert.strictEqual(a.integer, 5000n);
+        assert.strictEqual(a.value, 0.005);
+        assert.strictEqual(b.integer, 205000n);
+        assert.strictEqual(b.value, 0.205);
       });
 
       specify('one.b', function () {
