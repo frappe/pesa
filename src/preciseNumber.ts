@@ -234,7 +234,7 @@ export default class PreciseNumber {
   set precision(precision: number) {
     precision = this.#validateAndGetPrecision(precision);
     this.#value = matchPrecision(this.#value, this.precision, this.#precision);
-    this.#precision = this.#precision;
+    this.#precision = precision;
   }
 
   /* ---------------------------------
