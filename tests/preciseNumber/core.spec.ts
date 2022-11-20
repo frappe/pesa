@@ -1,7 +1,6 @@
 import * as assert from 'assert';
 import 'mocha';
 import {
-  getFractionalLength,
   getIsInputValid,
   scaler,
   ScalerInput,
@@ -41,29 +40,6 @@ describe('Core functions', function () {
 
       specify(`input: ${input}`, function () {
         assert.strictEqual(scalerOutput, output);
-      });
-    }
-  });
-
-  describe('getFractionalLength', function () {
-    const testThese = [
-      [-1.22, 2],
-      [-1, 0],
-      [1.22, 2],
-      ['1.22', 2],
-      [1.999999999999999, 15],
-      [1.99999999999999999999999999, 0],
-      ['1.99999999999999999999999999', 26],
-      [1.11111111111111111111111111, 16],
-      ['1.11111111111111111111111111', 26],
-      ['1.12345678912345678912', 20],
-    ];
-
-    for (let [input, length] of testThese) {
-      const fractionalLength = getFractionalLength(input);
-
-      specify(`input: ${input}`, function () {
-        assert.strictEqual(fractionalLength, length);
       });
     }
   });

@@ -1,22 +1,19 @@
 export type ScalerInput = string | number;
 
-function replaceDelimiters(value: ScalerInput) {
-  if (typeof value === 'string') {
-    return value.replace(/[_,]/g, '');
-  }
-  return value;
-}
-
 export function scaler(value: ScalerInput, precision: number): bigint {
-  value = replaceDelimiters(value);
-  throwIfNotValid(value);
-  value = stripZeros(value);
-  const fractionalLength = getFractionalLength(value);
-  const stringRep = typeof value === 'number' ? value.toString() : value;
-  const floatRep = typeof value === 'string' ? parseFloat(value) : value;
+  if (typeof value === 'string') {
+    value = replaceDelimiters(value);
+    throwIfNotValid(value);
+    value = stripZeros(value);
+  }
+
+  const stringRep = typeof value === 'number' ? value + '' : value;
+  const floatRep = typeof value === 'string' ? Number(value) : value;
+
   const parts = stringRep.split('.');
   const whole = parts[0];
   const fractional = parts[1] ?? '';
+  const fractionalLength = fractional.length;
 
   let stringBigRep = whole + fractional;
   stringBigRep = stringBigRep === '-0' ? '0' : stringBigRep;
@@ -26,38 +23,21 @@ export function scaler(value: ScalerInput, precision: number): bigint {
     bigRep *= 10n ** BigInt(precision - fractionalLength);
   } else {
     bigRep /= 10n ** BigInt(fractionalLength - precision);
-    if (parseInt(fractional[precision]) > 4) {
+    if (Number(fractional[precision]) > 4) {
       bigRep += floatRep >= 0 ? 1n : -1n;
     }
   }
+
   return bigRep;
 }
 
-export function getFractionalLength(value: ScalerInput): number {
-  const string = value.toString();
-  const whereIsTheDot = string.indexOf('.') + 1;
-  if (whereIsTheDot === 0) {
-    return 0;
-  }
-  return string.substring(whereIsTheDot).length;
-}
-
-function throwIfNotValid(value: ScalerInput) {
-  const type = typeof value;
-  if (type === 'string' && !getIsInputValid(value as string)) {
-    throw Error(`invalid input '${value}' of type '${type}'`);
-  }
-}
-
-export function getIsInputValid(value: string): boolean {
-  // regex for: ['22.22', '.22', '22.']
-  const hasMatch = value.match(/^-?\d*(?:(?:\.?\d)|(?:\d\.?))\d*$/);
-  return Boolean(hasMatch);
+function replaceDelimiters(value: string): string {
+  return value.replace(/[_,]/g, '');
 }
 
 export function toDecimalString(value: bigint, precision: number): string {
   const isNegative = value < 0;
-  let stringRep = value.toString();
+  let stringRep = value + '';
   stringRep = isNegative ? stringRep.slice(1) : stringRep;
 
   const d = stringRep.length - precision;
@@ -78,13 +58,14 @@ export function toDecimalString(value: bigint, precision: number): string {
   return sign + whole;
 }
 
-function stripZeros(value: ScalerInput): ScalerInput {
-  if (typeof value === 'string' && value.includes('.') && value.endsWith('0')) {
+function stripZeros(value: string): string {
+  if (value.includes('.') && value.endsWith('0')) {
     let [fractional, whole] = (value as string).split('.');
     whole = whole.replace(/0*$/, '');
     whole = whole.length > 0 ? `.${whole}` : whole;
     return fractional + whole;
   }
+
   return value;
 }
 
@@ -117,6 +98,50 @@ export function matchPrecision(
   return value;
 }
 
+function throwIfNotValid(value: string) {
+  if (getIsInputValid(value as string)) {
+    return;
+  }
+
+  throw Error(`invalid input '${value}' of type '${typeof value}'`);
+}
+
+export function getIsInputValid(value: string): boolean {
+  // regex for: ['22.22', '.22', '22.']
+  const hasMatch = value.match(/^-?\d*(?:(?:\.?\d)|(?:\d\.?))\d*$/);
+  return Boolean(hasMatch);
+}
+
 export function throwRateNotProvided(from: string, to: string) {
   throw Error(`rate not provided for conversion from ${from} to ${to}`);
+}
+
+export function scalerNumber(value: ScalerInput, precision: number) {
+  if (typeof value === 'string') {
+    return scaler(value, precision);
+  }
+
+  // const sign = Math.sign(value);
+  // const abs = Math.abs(value);
+
+  const frac = (value + '').split('.')[1];
+  const fracLength = frac?.length;
+
+  let fracBig = 0n;
+  if (frac && fracLength < precision) {
+    fracBig = BigInt(frac) * 10n ** BigInt(precision - fracLength);
+  }
+
+  if (frac && fracLength >= precision) {
+    fracBig = BigInt(frac.substring(0, precision));
+  }
+
+  const wholeBig = BigInt(Math.trunc(value)) * 10n ** BigInt(precision);
+  const big = wholeBig + fracBig;
+
+  if (fracBig % 10n > 4n) {
+    return big + (wholeBig > 0n ? 1n : -1n);
+  }
+
+  return big;
 }

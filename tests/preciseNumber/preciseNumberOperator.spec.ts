@@ -60,8 +60,8 @@ describe('PreciseNumber, Operators', function () {
       const p = getPreciseNumberMaker(precision);
       specify(`${type}: ${a}, ${b}`, () => {
         const final = p(a)[type](b);
-        assert.strictEqual(final.i, integer);
-        assert.strictEqual(final.v, value);
+        assert.strictEqual(final.integer, integer);
+        assert.strictEqual(final.value, value);
       });
     }
   });
@@ -73,14 +73,14 @@ describe('PreciseNumber, Operators', function () {
     const result = number.add(22).sub(33).mul(100).div(5);
 
     specify('checking initial', function () {
-      assert.strictEqual(number.i, 100000000n);
-      assert.strictEqual(number.v, 100);
+      assert.strictEqual(number.integer, 100000000n);
+      assert.strictEqual(number.value, 100);
       assert.strictEqual(number.precision, precision);
     });
 
     specify('checking result', function () {
-      assert.strictEqual(result.i, 1780000000n);
-      assert.strictEqual(result.v, 1780);
+      assert.strictEqual(result.integer, 1780000000n);
+      assert.strictEqual(result.value, 1780);
       assert.strictEqual(result.precision, precision);
     });
   });
