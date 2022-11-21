@@ -119,6 +119,10 @@ export default class PreciseNumber {
     return this.#precision;
   }
 
+  get store(): string {
+    return this.round(this.precision);
+  }
+
   set precision(precision: number) {
     precision = validateAndGetPrecision(precision);
 
