@@ -1,6 +1,7 @@
 <div align="center" markdown="1">
 
-<img src=".github/logo.png" alt="pesa logo" width="256"/>
+<img src="https://user-images.githubusercontent.com/29507195/207266449-e035883d-fab5-49ef-a60e-d2b085f21835.png" alt="pesa logo" width="256"/>
+
 
 # पेसा
 
@@ -804,7 +805,7 @@ Check this chart for more info: [`BigInt` Browser compatibility](https://develop
 
 A short note on the difference between the two in the context of **`pesa`**.
 
-<img src=".github/precision.png" alt="pesa logo" width="512"/>
+<img src="https://user-images.githubusercontent.com/29507195/207266783-acb0c9ae-fd66-4307-9b58-9c2ec18e87e3.png" alt="precision" width="512"/>
 
 Essentially:
 
