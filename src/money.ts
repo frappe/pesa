@@ -97,8 +97,7 @@ export default class Money {
   }
 
   get store(): string {
-    const { precision } = this.#preciseNumber;
-    return this.#preciseNumber.round(precision);
+    return this.#preciseNumber.store;
   }
 
   /* ---------------------------------

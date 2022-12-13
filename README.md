@@ -2,7 +2,6 @@
 
 <img src="https://user-images.githubusercontent.com/29507195/207266449-e035883d-fab5-49ef-a60e-d2b085f21835.png" alt="pesa logo" width="256"/>
 
-
 # पेसा
 
 </div>
